@@ -3,14 +3,14 @@ import { Question as QuestionType } from '../assessmentModel'
 
 // 5级Likert风格选项
 const likertOptions = [
-  { label: '非常同意', color: 'bg-green-500', size: 54 },
-  { label: '同意', color: 'bg-green-300', size: 44 },
-  { label: '不确定', color: 'bg-gray-300', size: 36 },
-  { label: '反对', color: 'bg-purple-300', size: 44 },
   { label: '非常反对', color: 'bg-purple-500', size: 54 },
+  { label: '反对', color: 'bg-purple-300', size: 44 },
+  { label: '不确定', color: 'bg-gray-300', size: 36 },
+  { label: '同意', color: 'bg-green-300', size: 44 },
+  { label: '非常同意', color: 'bg-green-500', size: 54 },
 ]
 
-const likertLabels = ['同意', '反对']
+const likertLabels = ['反对', '同意']
 
 interface QuestionProps {
   question: QuestionType
@@ -49,8 +49,8 @@ export function Question({
       </div>
 
       <div className="flex flex-row items-center justify-center gap-4 select-none px-4 sm:px-0">
-        {/* 左侧"同意"标签 */}
-        <span className="mr-2 sm:mr-4 text-green-600 text-lg font-bold w-8 sm:w-12 text-right">
+        {/* 左侧"反对"标签 */}
+        <span className="mr-2 sm:mr-4 text-purple-600 text-lg font-bold w-8 sm:w-12 text-right">
           {likertLabels[0]}
         </span>
         {/* 5个圆点 */}
@@ -66,8 +66,8 @@ export function Question({
             onHover={onHover}
           />
         ))}
-        {/* 右侧"反对"标签 */}
-        <span className="ml-2 sm:ml-4 text-purple-600 text-lg font-bold w-8 sm:w-12 text-left">
+        {/* 右侧"同意"标签 */}
+        <span className="ml-2 sm:ml-4 text-green-600 text-lg font-bold w-8 sm:w-12 text-left">
           {likertLabels[1]}
         </span>
       </div>

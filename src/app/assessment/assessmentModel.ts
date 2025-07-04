@@ -12,8 +12,8 @@ export interface Dimension {
   id: string
 }
 
-// 选项分值（1-5分）
-export const optionScores = [5, 4, 3, 2, 1]
+// 选项分值（1-5分）- 从左到右：非常反对(1分)到非常同意(5分)
+export const optionScores = [1, 2, 3, 4, 5]
 
 // 评估维度及其权重配置
 export const dimensions: Dimension[] = [
