@@ -1,5 +1,5 @@
 import { LikertOption } from './LikertOption'
-import { Question as QuestionType } from '../assessmentModel'
+import { Question as QuestionType } from '@/generated/prisma/client'
 
 // 5级Likert风格选项
 const likertOptions = [
@@ -45,6 +45,11 @@ export function Question({
           <div className="text-xl text-gray-800 font-semibold tracking-wide">
             {question.text}
           </div>
+          {question.explanation && (
+            <div className="mt-2 text-gray-600">
+              {question.explanation}
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,32 +1,78 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
-import { dimensions } from './assessmentModel'
-import { useAssessmentStore } from '../store/assessment'
 import { useRouter } from 'next/navigation'
+import { useAssessmentStore } from '../store/assessment'
+import { getDimensions } from './actions'
 import CalculatingAnimation from './components/CalculatingAnimation'
 import { Question } from './components/Question'
 import { ProgressBar } from './components/ProgressBar'
 import { NavigationButtons } from './components/NavigationButtons'
+import type { Dimension as PrismaDimension, Question as PrismaQuestion } from '@/generated/prisma/client'
+
+// 扩展 Dimension 类型以包含 questions
+interface Dimension extends PrismaDimension {
+  questions: PrismaQuestion[]
+}
 
 export default function AssessmentPage() {
   const router = useRouter()
   const [groupIdx, setGroupIdx] = useState(0)
-  const { answers, setAnswers } = useAssessmentStore()
+  const [dimensions, setDimensions] = useState<Dimension[]>([])
+  const { answers, setAnswers, hydrated } = useAssessmentStore()
   const [hovered, setHovered] = useState<{
     qIdx: number
     optIdx: number
   } | null>(null)
   const [isSimulating, setIsSimulating] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   // 创建问题元素的refs
   const questionRefs = useRef<(HTMLDivElement | null)[]>([])
 
+  // 加载维度和题目数据
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const dimensionsData = await getDimensions()
+        if (!dimensionsData || dimensionsData.length === 0) {
+          throw new Error('未找到评估数据')
+        }
+        setDimensions(dimensionsData)
+        
+        // 等待 store hydration 完成后再处理答案
+        if (hydrated) {
+          if (!answers || answers.length === 0) {
+            const initialAnswers = dimensionsData.map(dim => 
+              new Array(dim.questions.length).fill(null)
+            )
+            setAnswers(initialAnswers)
+          } else if (answers.length < dimensionsData.length) {
+            // 如果已有答案，但维度数量不匹配，则扩展答案数组
+            const newAnswers = [...answers]
+            for (let i = answers.length; i < dimensionsData.length; i++) {
+              newAnswers.push(new Array(dimensionsData[i].questions.length).fill(null))
+            }
+            setAnswers(newAnswers)
+          }
+        }
+        setLoading(false)
+      } catch (error) {
+        console.error('加载数据失败:', error)
+        setError(error instanceof Error ? error.message : '加载数据失败，请稍后重试')
+        setLoading(false)
+      }
+    }
+
+    if (hydrated) {
+      loadData()
+    }
+  }, [hydrated, answers, setAnswers]) // 添加缺失的依赖
+
   // 初始化时检查已回答的题目，自动切换到最后回答的组别
   useEffect(() => {
-    // 确保 answers 存在且不为空
     if (answers && answers.length > 0) {
-      // 找到最后一个有答案的组别
       const lastAnsweredGroup = answers.reduce(
         (lastGroup, groupAnswers, currentGroup) => {
           const hasAnswers = groupAnswers.some((answer) => answer !== null)
@@ -35,10 +81,8 @@ export default function AssessmentPage() {
         0
       )
 
-      // 如果找到的组别不是第一组，则切换过去
       if (lastAnsweredGroup > 0) {
         setGroupIdx(lastAnsweredGroup)
-      } else {
       }
     }
   }, [answers])
@@ -53,19 +97,54 @@ export default function AssessmentPage() {
     }
   }, [groupIdx])
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <div className="text-red-500 text-lg">{error}</div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          重新加载
+        </button>
+      </div>
+    )
+  }
+
+  if (dimensions.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-500">暂无评估数据</div>
+      </div>
+    )
+  }
+
   // 当前组所有题目是否已作答
-  const currentGroupAllAnswered = answers[groupIdx].every((a) => a !== null)
+  const currentGroupAllAnswered = answers && answers[groupIdx] 
+    ? answers[groupIdx].every((a) => a !== null)
+    : false
 
   // 计算总体完成度
   const totalQuestions = dimensions.reduce(
     (sum, d) => sum + d.questions.length,
     0
   )
-  const answeredCount = answers.flat().filter((a) => a !== null).length
+  const answeredCount = answers?.flat().filter((a) => a !== null).length ?? 0
   const progress = Math.round((answeredCount / totalQuestions) * 100)
 
   const handleSelect = (qIdx: number, optIdx: number) => {
-    const newAnswers = answers.map((arr) => [...arr])
+    const newAnswers = [...(answers || [])]
+    if (!newAnswers[groupIdx]) {
+      newAnswers[groupIdx] = new Array(dimensions[groupIdx].questions.length).fill(null)
+    }
     newAnswers[groupIdx][qIdx] = optIdx
     setAnswers(newAnswers)
 
@@ -142,7 +221,7 @@ export default function AssessmentPage() {
         </div>
 
         {/* 当前组所有题目 */}
-        <div className="w-full flex flex-col gap-12 px-6 sm:px-12 py-8">
+        <div className="w-full">
           {dimensions[groupIdx].questions.map((q, qIdx) => (
             <Question
               key={qIdx}
@@ -167,9 +246,7 @@ export default function AssessmentPage() {
           totalGroups={dimensions.length}
           isCurrentGroupAnswered={currentGroupAllAnswered}
           onPrevious={() => setGroupIdx((g) => Math.max(0, g - 1))}
-          onNext={() =>
-            setGroupIdx((g) => Math.min(dimensions.length - 1, g + 1))
-          }
+          onNext={() => setGroupIdx((g) => Math.min(dimensions.length - 1, g + 1))}
           onComplete={handleComplete}
         />
       </div>

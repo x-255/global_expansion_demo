@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import { devtools, persist, createJSONStorage } from 'zustand/middleware'
-import { dimensions } from '../assessment/assessmentModel'
 
 // 定义store的类型
 interface AssessmentStore {
   answers: (number | null)[][]
   setAnswers: (answers: (number | null)[][]) => void
   clearAnswers: () => void
+  hydrated: boolean
+  setHydrated: (state: boolean) => void
 }
 
 // 创建store
@@ -15,7 +16,8 @@ export const useAssessmentStore = create<AssessmentStore>()(
     devtools(
       (set) => ({
         // 初始状态
-        answers: dimensions.map((d) => Array(d.questions.length).fill(null)),
+        answers: [],
+        hydrated: false,
 
         // 设置答案
         setAnswers: (answers) => {
@@ -24,10 +26,12 @@ export const useAssessmentStore = create<AssessmentStore>()(
 
         // 清除答案
         clearAnswers: () => {
-          const emptyAnswers = dimensions.map((d) =>
-            Array(d.questions.length).fill(null)
-          )
-          set({ answers: emptyAnswers }, false, 'assessment/clearAnswers')
+          set({ answers: [] }, false, 'assessment/clearAnswers')
+        },
+
+        // 设置 hydration 状态
+        setHydrated: (state) => {
+          set({ hydrated: state }, false, 'assessment/setHydrated')
         },
       }),
       {
@@ -41,6 +45,11 @@ export const useAssessmentStore = create<AssessmentStore>()(
         typeof window !== 'undefined'
           ? createJSONStorage(() => sessionStorage)
           : undefined,
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.setHydrated(true)
+        }
+      },
     }
   )
 )

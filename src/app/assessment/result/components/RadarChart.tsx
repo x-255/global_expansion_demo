@@ -8,7 +8,7 @@ import {
   Legend,
 } from 'chart.js'
 import { Radar } from 'react-chartjs-2'
-import { dimensions } from '../../assessmentModel'
+import type { Dimension } from '@/generated/prisma/client'
 
 // 注册Chart.js组件
 ChartJS.register(
@@ -20,45 +20,49 @@ ChartJS.register(
   Legend
 )
 
-// 图表配置
-const chartOptions = {
-  scales: {
-    r: {
-      angleLines: {
-        display: true,
-      },
-      suggestedMin: 0,
-      suggestedMax: 100,
-    },
-  },
-  plugins: {
-    legend: {
-      display: false,
-    },
-  },
+interface RadarChartProps {
+  scores: number[]
+  dimensions: Dimension[]
 }
 
-export const RadarChart = ({ scores }: { scores: number[] }) => {
-  const chartData = {
-    labels: dimensions.map((d) => d.name),
+export function RadarChart({ scores, dimensions }: RadarChartProps) {
+  const data = {
+    labels: dimensions.map(d => d.name),
     datasets: [
       {
-        label: '维度得分',
+        label: '得分',
         data: scores,
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgba(54, 162, 235, 1)',
+        borderColor: 'rgb(54, 162, 235)',
         borderWidth: 2,
-        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+        pointBackgroundColor: 'rgb(54, 162, 235)',
         pointBorderColor: '#fff',
         pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(54, 162, 235, 1)',
+        pointHoverBorderColor: 'rgb(54, 162, 235)',
       },
     ],
   }
 
+  const options = {
+    scales: {
+      r: {
+        angleLines: {
+          display: true,
+        },
+        suggestedMin: 0,
+        suggestedMax: 100,
+      },
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+  }
+
   return (
-    <div className="w-full max-w-2xl mx-auto mb-12 aspect-square">
-      <Radar data={chartData} options={chartOptions} />
+    <div className="w-full max-w-xl mx-auto">
+      <Radar data={data} options={options} />
     </div>
   )
 } 

@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 管理员表
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String   // 存储加密后的密码
+  name      String?  // 管理员姓名
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+// 公司用户表
+model Company {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique  // 公司名称，用作登录标识
+  industry    String?   // 行业（可选）
+  size        String?   // 公司规模（可选）
+  location    String?   // 公司所在地（可选）
+  assessments CompanyAssessment[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("companies")
+}
+
+// 评估维度表
+model Dimension {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  questions   Question[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     Boolean   @default(false)
+
+  @@map("dimensions")
+}
+
+// 问题表
+model Question {
+  id          Int       @id @default(autoincrement())
+  text        String
+  explanation String?   // 可选的解释说明
+  dimensionId Int       // 逻辑外键，引用 Dimension.id
+  dimension   Dimension @relation(fields: [dimensionId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     Boolean   @default(false)
+
+  @@map("questions")
+  @@index([dimensionId])
+}
+
+// 公司评估记录表
+model CompanyAssessment {
+  id        Int      @id @default(autoincrement())
+  companyId Int      // 逻辑外键，引用 Company.id
+  company   Company  @relation(fields: [companyId], references: [id])
+  answers   Json     // 存储答案数组，格式：[{questionId: number, answer: number}]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("company_assessments")
+  @@index([companyId])
+}

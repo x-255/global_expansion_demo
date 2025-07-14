@@ -15,9 +15,14 @@ export function NavigationButtons({
   onNext,
   onComplete,
 }: NavigationButtonsProps) {
+  const showPreviousButton = groupIdx > 0
+  const showNextButton = isCurrentGroupAnswered
+  const isLastGroup = groupIdx === totalGroups - 1
+
   return (
-    <div className="w-full flex justify-between gap-6 px-6 sm:px-12 pb-12">
-      {groupIdx > 0 && (
+    <div className="w-full flex justify-between items-center gap-6 px-6 sm:px-12 py-8 sticky bottom-0 bg-white border-t border-gray-100">
+      {/* 上一组按钮或占位元素 */}
+      {showPreviousButton ? (
         <button
           className="px-8 py-3 bg-gray-200 text-gray-700 rounded-full text-lg font-semibold shadow hover:bg-gray-300 transition-all flex items-center gap-2"
           onClick={onPrevious}
@@ -40,15 +45,19 @@ export function NavigationButtons({
           </svg>
           <span>上一组</span>
         </button>
+      ) : (
+        <div />
       )}
+      
       <div className="flex-1" />
-      {isCurrentGroupAnswered && (
+      
+      {showNextButton && (
         <button
           className="px-8 py-3 bg-green-600 text-white rounded-full text-lg font-semibold shadow-lg hover:bg-green-700 transition-all flex items-center gap-2"
-          onClick={groupIdx === totalGroups - 1 ? onComplete : onNext}
+          onClick={isLastGroup ? onComplete : onNext}
         >
-          <span>{groupIdx === totalGroups - 1 ? '完成评估' : '下一组'}</span>
-          {groupIdx === totalGroups - 1 ? (
+          <span>{isLastGroup ? '完成评估' : '下一组'}</span>
+          {isLastGroup ? (
             <svg
               width="24"
               height="24"
