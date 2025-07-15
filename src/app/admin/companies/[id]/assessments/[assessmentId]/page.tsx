@@ -1,5 +1,4 @@
 import { getDimensions } from '@/app/assessment/actions'
-import type { Dimension, Question, CompanyAssessment } from '@/generated/prisma/client'
 import { AssessmentDetail } from './AssessmentDetail'
 
 interface Props {

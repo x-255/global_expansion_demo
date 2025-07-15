@@ -27,11 +27,6 @@ function calculateDimensionScore(questions: Question[], dimensionAnswers: Array<
   return validAnswers === 0 ? 0 : Math.round(totalScore / validAnswers)
 }
 
-function calculateTotalScore(dimensions: Dimension[], dimensionScores: number[]) {
-  if (dimensions.length === 0) return 0
-  return Math.round(dimensionScores.reduce((sum, score) => sum + score, 0) / dimensions.length)
-}
-
 export default function ResultPage() {
   const router = useRouter()
   const { answers, clearAnswers, hydrated } = useAssessmentStore()
@@ -39,7 +34,7 @@ export default function ResultPage() {
   const [dimensionScores, setDimensionScores] = useState<Array<{ id: number, name: string, score: number, averageScore: number }>>([])
   const [totalScore, setTotalScore] = useState<number>(0)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     // 如果store还没有hydrated，不执行任何操作
@@ -83,8 +78,8 @@ export default function ResultPage() {
         setDimensionScores(scores)
         setTotalScore(total)
         setLoading(false)
-      } catch (error) {
-        setError('加载评估结果失败，请稍后重试')
+      } catch {
+        setErrorMessage('加载评估结果失败，请稍后重试')
         setLoading(false)
       }
     }
@@ -105,10 +100,10 @@ export default function ResultPage() {
     )
   }
 
-  if (error) {
+  if (errorMessage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-500">{error}</div>
+        <div className="text-red-500">{errorMessage}</div>
       </div>
     )
   }

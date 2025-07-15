@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getOrCreateCompany } from './actions'
+import { useAssessmentStore } from './store/assessment'
 import Image from 'next/image'
 
 export default function Home() {
@@ -10,6 +11,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { clearAnswers } = useAssessmentStore()
 
   const handleStartAssessment = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -18,6 +20,8 @@ export default function Home() {
 
     try {
       await getOrCreateCompany(companyName)
+      // 清空之前的答案
+      clearAnswers()
       router.push('/assessment')
     } catch (error) {
       setError(error instanceof Error ? error.message : '发生未知错误')
