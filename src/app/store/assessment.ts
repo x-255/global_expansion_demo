@@ -50,10 +50,11 @@ export const useAssessmentStore = create<AssessmentStore>()(
         typeof window !== 'undefined'
           ? createJSONStorage(() => sessionStorage)
           : undefined,
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.setHydrated(true)
-        }
+      onRehydrateStorage: () => (hydratedState) => {
+        // 使用 setTimeout 确保在下一个事件循环中设置状态
+        setTimeout(() => {
+          useAssessmentStore.getState().setHydrated(true)
+        }, 0)
       },
     }
   )

@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAssessmentStore } from '../../store/assessment'
 import { getDimensions } from '../actions'
+import { getDimensionsAverageScores } from './actions'
 import { RadarChart } from './components/RadarChart'
 import { AnalysisReport } from './components/AnalysisReport'
-import { generateAnalysis } from './utils/analysis'
 import type { Dimension, Question } from '@/generated/prisma/client'
 
 // 计算单个维度的得分
@@ -34,15 +34,17 @@ function calculateTotalScore(dimensions: Dimension[], dimensionScores: number[])
 
 export default function ResultPage() {
   const router = useRouter()
-  const { answers, clearAnswers } = useAssessmentStore()
+  const { answers, clearAnswers, hydrated } = useAssessmentStore()
   const [dimensions, setDimensions] = useState<Dimension[]>([])
-  const [scores, setScores] = useState<number[]>([])
+  const [dimensionScores, setDimensionScores] = useState<Array<{ id: number, name: string, score: number, averageScore: number }>>([])
   const [totalScore, setTotalScore] = useState<number>(0)
-  const [analysis, setAnalysis] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
+    // 如果store还没有hydrated，不执行任何操作
+    if (!hydrated) return
+
     const loadData = async () => {
       try {
         // 如果没有答案，返回评估页面
@@ -51,34 +53,44 @@ export default function ResultPage() {
           return
         }
 
-        // 加载维度数据
-        const dimensionsData = await getDimensions()
+        // 加载维度数据和平均分
+        const [dimensionsData, averageScores] = await Promise.all([
+          getDimensions(),
+          getDimensionsAverageScores()
+        ])
+        
         setDimensions(dimensionsData)
 
-        // 计算每个维度的得分
-        const dimensionScores = dimensionsData.map(dim => ({
-          dimensionId: dim.id,
-          score: calculateDimensionScore(
+        // 计算每个维度的得分并合并平均分
+        const scores = dimensionsData.map(dim => {
+          const score = calculateDimensionScore(
             dim.questions,
             answers.filter(a => dim.questions.some(q => q.id === a.questionId))
           )
-        }))
+          
+          const averageScore = averageScores.find(avg => avg.dimensionId === dim.id)?.averageScore || 0
 
-        const scores = dimensionScores.map(ds => ds.score)
-        const total = Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length)
+          return {
+            id: dim.id,
+            name: dim.name,
+            score,
+            averageScore
+          }
+        })
 
-        setScores(scores)
+        const total = Math.round(scores.reduce((sum, item) => sum + item.score, 0) / scores.length)
+
+        setDimensionScores(scores)
         setTotalScore(total)
-        setAnalysis(generateAnalysis(dimensionScores, dimensionsData))
         setLoading(false)
-      } catch {
+      } catch (error) {
         setError('加载评估结果失败，请稍后重试')
         setLoading(false)
       }
     }
 
     loadData()
-  }, [answers, router])
+  }, [answers, router, hydrated]) // 添加 hydrated 到依赖数组
 
   const handleRestart = () => {
     clearAnswers()
@@ -112,8 +124,8 @@ export default function ResultPage() {
           </div>
           <div className="text-gray-600">总分（满分100）</div>
         </div>
-        <RadarChart scores={scores} dimensions={dimensions} />
-        <AnalysisReport analysis={analysis} />
+        <RadarChart scores={dimensionScores.map(d => d.score)} dimensions={dimensions} />
+        <AnalysisReport dimensions={dimensionScores} />
 
         {/* 返回按钮 */}
         <div className="mt-12 text-center">
