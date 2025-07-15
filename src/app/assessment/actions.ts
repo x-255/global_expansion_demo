@@ -37,4 +37,43 @@ export async function getQuestions() {
     }
   })
   return questions
+}
+
+export async function validateCompany(name: string) {
+  if (!name) return null
+
+  const company = await prisma.company.findUnique({
+    where: { name: name.trim() }
+  })
+
+  return company
+}
+
+export async function saveAssessment(companyName: string, answers: Array<{ questionId: number, answer: number }>) {
+  try {
+    // 获取公司信息
+    const company = await prisma.company.findUnique({
+      where: { name: companyName }
+    })
+
+    if (!company) {
+      throw new Error('未找到公司信息')
+    }
+
+    // 过滤掉未回答的问题
+    const validAnswers = answers.filter(item => item.answer !== null)
+
+    // 创建评估记录
+    const assessment = await prisma.companyAssessment.create({
+      data: {
+        companyId: company.id,
+        answers: validAnswers
+      }
+    })
+
+    return assessment
+  } catch (error) {
+    console.error('保存评估结果失败:', error)
+    throw new Error('保存评估结果失败')
+  }
 } 

@@ -1,10 +1,15 @@
 import { create } from 'zustand'
 import { devtools, persist, createJSONStorage } from 'zustand/middleware'
 
+interface Answer {
+  questionId: number
+  answer: number | null
+}
+
 // 定义store的类型
 interface AssessmentStore {
-  answers: (number | null)[][]
-  setAnswers: (answers: (number | null)[][]) => void
+  answers: Answer[]
+  setAnswers: (answers: Answer[]) => void
   clearAnswers: () => void
   hydrated: boolean
   setHydrated: (state: boolean) => void

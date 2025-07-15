@@ -2,14 +2,14 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAssessmentStore } from '../store/assessment'
-import { getDimensions } from './actions'
+import { getDimensions, validateCompany, saveAssessment } from './actions'
+import { getCompanyCookie } from '@/lib/cookies'
 import CalculatingAnimation from './components/CalculatingAnimation'
 import { Question } from './components/Question'
 import { ProgressBar } from './components/ProgressBar'
 import { NavigationButtons } from './components/NavigationButtons'
 import type { Dimension as PrismaDimension, Question as PrismaQuestion } from '@/generated/prisma/client'
 
-// 扩展 Dimension 类型以包含 questions
 interface Dimension extends PrismaDimension {
   questions: PrismaQuestion[]
 }
@@ -31,10 +31,23 @@ export default function AssessmentPage() {
   // 创建问题元素的refs
   const questionRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  // 加载维度和题目数据
+  // 验证公司并加载维度和题目数据
   useEffect(() => {
     const loadData = async () => {
       try {
+        // 从 cookie 获取公司信息
+        const companyName = await getCompanyCookie()
+        if (!companyName) {
+          router.push('/')
+          return
+        }
+
+        const company = await validateCompany(companyName)
+        if (!company) {
+          router.push('/')
+          return
+        }
+
         const dimensionsData = await getDimensions()
         if (!dimensionsData || dimensionsData.length === 0) {
           throw new Error('未找到评估数据')
@@ -44,17 +57,14 @@ export default function AssessmentPage() {
         // 等待 store hydration 完成后再处理答案
         if (hydrated) {
           if (!answers || answers.length === 0) {
-            const initialAnswers = dimensionsData.map(dim => 
-              new Array(dim.questions.length).fill(null)
+            // 初始化空的答案数组
+            const initialAnswers = dimensionsData.flatMap(dim => 
+              dim.questions.map(q => ({
+                questionId: q.id,
+                answer: null
+              }))
             )
             setAnswers(initialAnswers)
-          } else if (answers.length < dimensionsData.length) {
-            // 如果已有答案，但维度数量不匹配，则扩展答案数组
-            const newAnswers = [...answers]
-            for (let i = answers.length; i < dimensionsData.length; i++) {
-              newAnswers.push(new Array(dimensionsData[i].questions.length).fill(null))
-            }
-            setAnswers(newAnswers)
           }
         }
         setLoading(false)
@@ -68,24 +78,23 @@ export default function AssessmentPage() {
     if (hydrated) {
       loadData()
     }
-  }, [hydrated, answers, setAnswers]) // 添加缺失的依赖
+  }, [hydrated, answers, setAnswers, router])
 
   // 初始化时检查已回答的题目，自动切换到最后回答的组别
   useEffect(() => {
-    if (answers && answers.length > 0) {
-      const lastAnsweredGroup = answers.reduce(
-        (lastGroup, groupAnswers, currentGroup) => {
-          const hasAnswers = groupAnswers.some((answer) => answer !== null)
-          return hasAnswers ? currentGroup : lastGroup
-        },
-        0
-      )
+    if (answers && answers.length > 0 && dimensions.length > 0) {
+      const lastAnsweredGroup = dimensions.reduce((lastGroup, dimension, currentGroup) => {
+        const hasAnswers = dimension.questions.some(q => 
+          answers.some(a => a.questionId === q.id && a.answer !== null)
+        )
+        return hasAnswers ? currentGroup : lastGroup
+      }, 0)
 
       if (lastAnsweredGroup > 0) {
         setGroupIdx(lastAnsweredGroup)
       }
     }
-  }, [answers])
+  }, [answers, dimensions])
 
   // 当组别改变时，滚动到第一个问题
   useEffect(() => {
@@ -128,24 +137,25 @@ export default function AssessmentPage() {
   }
 
   // 当前组所有题目是否已作答
-  const currentGroupAllAnswered = answers && answers[groupIdx] 
-    ? answers[groupIdx].every((a) => a !== null)
-    : false
+  const currentGroupAllAnswered = dimensions[groupIdx].questions.every(q => 
+    answers.some(a => a.questionId === q.id && a.answer !== null)
+  )
 
   // 计算总体完成度
   const totalQuestions = dimensions.reduce(
     (sum, d) => sum + d.questions.length,
     0
   )
-  const answeredCount = answers?.flat().filter((a) => a !== null).length ?? 0
+  const answeredCount = answers.filter(a => a.answer !== null).length
   const progress = Math.round((answeredCount / totalQuestions) * 100)
 
   const handleSelect = (qIdx: number, optIdx: number) => {
-    const newAnswers = [...(answers || [])]
-    if (!newAnswers[groupIdx]) {
-      newAnswers[groupIdx] = new Array(dimensions[groupIdx].questions.length).fill(null)
-    }
-    newAnswers[groupIdx][qIdx] = optIdx
+    const questionId = dimensions[groupIdx].questions[qIdx].id
+    const newAnswers = answers.map(a => 
+      a.questionId === questionId 
+        ? { ...a, answer: optIdx }
+        : a
+    )
     setAnswers(newAnswers)
 
     // 如果不是最后一个问题，滚动到下一个问题
@@ -163,24 +173,46 @@ export default function AssessmentPage() {
   const simulateAssessment = () => {
     setIsSimulating(true)
 
-    // 直接生成所有答案
-    const newAnswers = dimensions.map((dim) =>
-      dim.questions.map(() => Math.floor(Math.random() * 5))
+    // 生成所有答案
+    const newAnswers = dimensions.flatMap(dim =>
+      dim.questions.map(q => ({
+        questionId: q.id,
+        answer: Math.floor(Math.random() * 5)
+      }))
     )
     setAnswers(newAnswers)
 
-    // 显示计算动画并延迟跳转
-    setIsCalculating(true)
-    setTimeout(() => {
-      router.push('/assessment/result')
-    }, 2500)
+    // 跳转到最后一组
+    setGroupIdx(dimensions.length - 1)
+    setIsSimulating(false)
   }
 
-  const handleComplete = () => {
-    setIsCalculating(true)
-    setTimeout(() => {
-      router.push('/assessment/result')
-    }, 2500)
+  const handleComplete = async () => {
+    try {
+      setIsCalculating(true)
+      const companyName = await getCompanyCookie()
+      
+      if (!companyName) {
+        throw new Error('未找到公司信息')
+      }
+
+      // 确保所有问题都已回答
+      if (!answers || answers.some(a => a.answer === null)) {
+        throw new Error('请回答所有问题后再提交')
+      }
+
+      // 保存评估结果
+      const validAnswers = answers.map(a => ({ questionId: a.questionId, answer: a.answer as number }))
+      await saveAssessment(companyName, validAnswers)
+
+      // 延迟跳转以显示计算动画
+      setTimeout(() => {
+        router.push('/assessment/result')
+      }, 2500)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '保存评估结果失败')
+      setIsCalculating(false)
+    }
   }
 
   return (
@@ -221,14 +253,15 @@ export default function AssessmentPage() {
         </div>
 
         {/* 当前组所有题目 */}
-        <div className="w-full">
-          {dimensions[groupIdx].questions.map((q, qIdx) => (
+        {dimensions[groupIdx].questions.map((q, qIdx) => {
+          const answer = answers.find(a => a.questionId === q.id)
+          return (
             <Question
               key={qIdx}
               question={q}
               qIdx={qIdx}
-              isAnswered={answers[groupIdx][qIdx] !== null}
-              selectedOption={answers[groupIdx][qIdx]}
+              isAnswered={answer?.answer !== null}
+              selectedOption={answer?.answer ?? null}
               hovered={hovered}
               onSelect={handleSelect}
               onHover={(qIdx, optIdx) =>
@@ -238,8 +271,8 @@ export default function AssessmentPage() {
                 questionRefs.current[qIdx] = el
               }}
             />
-          ))}
-        </div>
+          )
+        })}
 
         <NavigationButtons
           groupIdx={groupIdx}

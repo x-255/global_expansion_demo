@@ -9,14 +9,15 @@ import { generateAnalysis } from './utils/analysis'
 import type { Dimension, Question } from '@/generated/prisma/client'
 
 // 计算单个维度的得分
-function calculateDimensionScore(questions: Question[], answers: (number | null)[]) {
-  if (questions.length === 0 || !answers || answers.length === 0) return 0
+function calculateDimensionScore(questions: Question[], dimensionAnswers: Array<{ questionId: number, answer: number | null }>) {
+  if (questions.length === 0 || !dimensionAnswers || dimensionAnswers.length === 0) return 0
 
   let totalScore = 0
   let validAnswers = 0
 
-  answers.forEach(answer => {
-    if (answer !== null) {
+  questions.forEach(question => {
+    const answer = dimensionAnswers.find(a => a.questionId === question.id)?.answer
+    if (answer !== null && answer !== undefined) {
       // 将0-4的选项转换为0-100的分数
       totalScore += (answer / 4) * 100
       validAnswers++
@@ -45,7 +46,7 @@ export default function ResultPage() {
     const loadData = async () => {
       try {
         // 如果没有答案，返回评估页面
-        if (!answers || answers.flat().every((a) => a === null)) {
+        if (!answers || answers.every((a) => a.answer === null)) {
           router.push('/assessment')
           return
         }
@@ -55,13 +56,16 @@ export default function ResultPage() {
         setDimensions(dimensionsData)
 
         // 计算每个维度的得分
-        const dimensionScores = dimensionsData.map((dim, idx) => ({
+        const dimensionScores = dimensionsData.map(dim => ({
           dimensionId: dim.id,
-          score: calculateDimensionScore(dim.questions, answers[idx])
+          score: calculateDimensionScore(
+            dim.questions,
+            answers.filter(a => dim.questions.some(q => q.id === a.questionId))
+          )
         }))
 
         const scores = dimensionScores.map(ds => ds.score)
-        const total = calculateTotalScore(dimensionsData, scores)
+        const total = Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length)
 
         setScores(scores)
         setTotalScore(total)
