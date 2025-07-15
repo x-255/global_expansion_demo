@@ -1,4 +1,5 @@
 import { PrismaClient } from '../src/generated/prisma'
+import { hash } from 'bcrypt'
 
 const prisma = new PrismaClient()
 
@@ -6,6 +7,17 @@ async function main() {
   // 清理现有数据
   await prisma.question.deleteMany()
   await prisma.dimension.deleteMany()
+  await prisma.admin.deleteMany()
+
+  // 创建初始管理员
+  const hashedPassword = await hash('123123', 10)
+  await prisma.admin.create({
+    data: {
+      username: 'admin',
+      password: hashedPassword,
+      name: '系统管理员'
+    }
+  })
 
   // 创建维度
   const marketDimension = await prisma.dimension.create({

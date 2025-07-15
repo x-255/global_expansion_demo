@@ -5,6 +5,13 @@ import type { AssessmentWithScore } from './types'
 
 export async function getCompanies() {
   const companies = await prisma.company.findMany({
+    include: {
+      _count: {
+        select: {
+          assessments: true
+        }
+      }
+    },
     orderBy: {
       id: 'asc'
     }

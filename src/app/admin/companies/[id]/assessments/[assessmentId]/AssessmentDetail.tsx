@@ -89,7 +89,6 @@ export function AssessmentDetail({ dimensions, params }: Props) {
     const options = ['非常反对', '反对', '不确定', '同意', '非常同意']
     return options[answer]
   }
-  console.log(`dimensions====`, dimensions)
 
   return (
     <div className="container mx-auto px-4 py-8">
