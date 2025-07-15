@@ -23,7 +23,7 @@ export async function getDimensionsAverageScores() {
     const dimensions = await getDimensions()
     
     // 获取所有评估记录
-    const assessments = await prisma.companyAssessment.findMany({
+    const assessments = await prisma.assessment.findMany({
       select: {
         answers: true
       }
@@ -34,9 +34,16 @@ export async function getDimensionsAverageScores() {
       const dimensionQuestionIds = dimension.questions.map(q => q.id)
       
       // 计算该维度在所有评估中的总分
-      const scores = assessments.map(assessment => 
-        calculateDimensionScore(assessment.answers as Array<{ questionId: number, answer: number }>, dimensionQuestionIds)
-      ).filter(score => score > 0) // 过滤掉0分（未答题）的情况
+      const scores = assessments.map(assessment => {
+        let parsedAnswers: Array<{ questionId: number, answer: number }> = []
+        try {
+          parsedAnswers = JSON.parse(assessment.answers)
+        } catch (error) {
+          console.error('解析答案失败:', error)
+          return 0
+        }
+        return calculateDimensionScore(parsedAnswers, dimensionQuestionIds)
+      }).filter(score => score > 0) // 过滤掉0分（未答题）的情况
       
       const averageScore = scores.length > 0
         ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length)

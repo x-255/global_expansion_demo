@@ -8,25 +8,37 @@ export async function getOrCreateCompany(name: string) {
     throw new Error('公司名称不能为空')
   }
 
+  const trimmedName = name.trim()
+
   try {
     // 先尝试查找公司
-    let company = await prisma.company.findUnique({
-      where: { name: name.trim() }
+    let company = await prisma.company.findFirst({
+      where: { name: trimmedName }
     })
 
     // 如果公司不存在，则创建新公司
     if (!company) {
-      company = await prisma.company.create({
-        data: { name: name.trim() }
-      })
+      try {
+        company = await prisma.company.create({
+          data: { name: trimmedName }
+        })
+      } catch (createError) {
+        // 如果创建失败，再次尝试查找（处理并发情况）
+        company = await prisma.company.findFirst({
+          where: { name: trimmedName }
+        })
+        
+        // 如果还是找不到，则确实是出错了
+        if (!company) {
+          throw createError
+        }
+      }
     }
 
-    // 设置 cookie
     await setCompanyCookie(company.name)
-
     return company
   } catch (error) {
-    console.error('Error in getOrCreateCompany:', error)
-    throw new Error('处理公司信息时出错')
+    console.error('处理公司信息失败:', error)
+    throw new Error('处理公司信息失败')
   }
 } 

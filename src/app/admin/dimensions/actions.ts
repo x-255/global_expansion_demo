@@ -2,38 +2,30 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import type { Prisma, Question } from '@/generated/prisma/client'
-
-export interface DimensionFormData {
-  name: string
-  description: string
-}
-
-type DimensionWithQuestions = Prisma.DimensionGetPayload<{
-  include: {
-    questions: true
-  }
-}> & {
-  questions: Array<Question & { deleted: boolean }>
-}
+import type { DimensionFormData, DimensionWithQuestions } from './types'
 
 export async function getDimensions(): Promise<DimensionWithQuestions[]> {
-  const dimensions = await prisma.dimension.findMany({
-    where: {
-      deleted: false
-    },
-    include: {
-      questions: {
-        where: {
-          deleted: false
+  try {
+    const dimensions = await prisma.dimension.findMany({
+      where: {
+        deleted: false
+      },
+      include: {
+        questions: {
+          where: {
+            deleted: false
+          }
         }
-      }
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  })
-  return dimensions
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
+    return dimensions
+  } catch (error) {
+    console.error('获取维度列表失败:', error)
+    throw new Error('获取维度列表失败')
+  }
 }
 
 export async function createDimension(data: DimensionFormData): Promise<DimensionWithQuestions> {
@@ -41,6 +33,7 @@ export async function createDimension(data: DimensionFormData): Promise<Dimensio
     data: {
       name: data.name,
       description: data.description,
+      deleted: false
     },
     include: {
       questions: {
@@ -54,22 +47,22 @@ export async function createDimension(data: DimensionFormData): Promise<Dimensio
 }
 
 export async function updateDimension(id: number, data: DimensionFormData): Promise<DimensionWithQuestions> {
-  const dimension = await prisma.dimension.findFirst({
-    where: {
+  const dimension = await prisma.dimension.findUnique({
+    where: { 
       id,
       deleted: false
     }
   })
 
   if (!dimension) {
-    throw new Error('维度不存在或已被删除')
+    throw new Error('维度不存在')
   }
 
   const updated = await prisma.dimension.update({
     where: { id },
     data: {
       name: data.name,
-      description: data.description,
+      description: data.description
     },
     include: {
       questions: {
@@ -85,8 +78,8 @@ export async function updateDimension(id: number, data: DimensionFormData): Prom
 }
 
 export async function deleteDimension(id: number): Promise<void> {
-  const dimension = await prisma.dimension.findFirst({
-    where: {
+  const dimension = await prisma.dimension.findUnique({
+    where: { 
       id,
       deleted: false
     },
@@ -100,19 +93,28 @@ export async function deleteDimension(id: number): Promise<void> {
   })
 
   if (!dimension) {
-    throw new Error('维度不存在或已被删除')
+    throw new Error('维度不存在')
   }
 
   if (dimension.questions.length > 0) {
-    throw new Error('该维度下还有题目，无法删除')
+    // 如果有关联的题目，将维度和所有关联的题目都标记为已删除
+    await prisma.$transaction([
+      prisma.question.updateMany({
+        where: { dimensionId: id },
+        data: { deleted: true }
+      }),
+      prisma.dimension.update({
+        where: { id },
+        data: { deleted: true }
+      })
+    ])
+  } else {
+    // 如果没有关联的题目，只标记维度为已删除
+    await prisma.dimension.update({
+      where: { id },
+      data: { deleted: true }
+    })
   }
-
-  await prisma.dimension.update({
-    where: { id },
-    data: {
-      deleted: true
-    }
-  })
 
   revalidatePath('/admin/dimensions')
 } 

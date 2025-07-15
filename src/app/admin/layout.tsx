@@ -1,8 +1,9 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useState } from 'react'
+import { logout } from './login/actions'
 
 const menuItems = [
   {
@@ -49,7 +50,32 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [loading, setLoading] = useState(false)
+
+  const handleLogout = async () => {
+    if (!confirm('确定要退出登录吗？')) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      await logout()
+      // 使用 replace 而不是 push，这样用户不能通过浏览器的后退按钮回到之前的页面
+      router.replace('/admin/login')
+    } catch (error) {
+      console.error('退出登录失败:', error)
+      alert('退出登录失败，请稍后重试')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 如果是登录页面，直接返回内容
+  if (pathname === '/admin/login') {
+    return children
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -87,7 +113,7 @@ export default function AdminLayout({
       {/* 主内容区 */}
       <div className={`lg:pl-64 transition-all duration-300 ${isSidebarOpen ? 'pl-64' : 'pl-0'}`}>
         {/* 顶部栏 */}
-        <div className="sticky top-0 z-20 flex items-center h-16 bg-white shadow-sm px-4">
+        <div className="sticky top-0 z-20 flex items-center justify-between h-16 bg-white shadow-sm px-4">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className={`p-2 rounded-md hover:bg-gray-100 lg:hidden ${isSidebarOpen ? 'hidden' : ''}`}
@@ -95,6 +121,18 @@ export default function AdminLayout({
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
+          </button>
+
+          {/* 登出按钮 */}
+          <button
+            onClick={handleLogout}
+            disabled={loading}
+            className="ml-auto flex items-center px-3 py-2 text-gray-600 hover:text-red-600 transition-colors duration-200"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            {loading ? '退出中...' : '退出登录'}
           </button>
         </div>
 

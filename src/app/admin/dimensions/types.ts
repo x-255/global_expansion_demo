@@ -1,16 +1,10 @@
-import type { Question } from '@/generated/prisma/client'
-
-export interface Dimension {
-  id: number
-  name: string
-  description: string
-  questions: Question[]
-  createdAt: Date
-  updatedAt: Date
-  deleted: boolean
-}
+import type { Dimension, Question } from '../../../generated/prisma/client'
 
 export interface DimensionFormData {
   name: string
-  description: string
+  description: string | null
+}
+
+export interface DimensionWithQuestions extends Dimension {
+  questions: Question[]
 } 

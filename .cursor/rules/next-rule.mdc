@@ -1,6 +1,9 @@
 ---
+description: 
+globs: 
 alwaysApply: true
 ---
 - 无论是回答问题还是fix error，你始终应该使用中文
 - 如果有问题应该尽量在没有commit的代码中分析原因，一般情况下commit过的都是已经跑通的代码，当然，具体需不需要改动需要你仔细分析造成问题的原因再进行解决
 - 如果有服务端相关操作有限使用server actions而不是api route
+- 使用nextjs的api时如果有报错先去[官方文档](https://nextjs.org/docs)查询最新版本的用法

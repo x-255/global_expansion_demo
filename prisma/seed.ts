@@ -24,6 +24,7 @@ async function main() {
     data: {
       name: '市场潜力',
       description: '评估目标市场的规模、增长潜力和竞争格局',
+      deleted: false,
     },
   })
 
@@ -31,6 +32,7 @@ async function main() {
     data: {
       name: '运营能力',
       description: '评估公司的运营效率和管理能力',
+      deleted: false,
     },
   })
 
@@ -38,6 +40,7 @@ async function main() {
     data: {
       name: '本地化能力',
       description: '评估公司适应目标市场的能力',
+      deleted: false,
     },
   })
 
@@ -46,53 +49,62 @@ async function main() {
     data: [
       // 市场潜力维度的问题
       {
-        text: '目标市场的规模和增长率如何？',
+        text: '目标市场具有良好的规模和增长率',
         explanation: '考虑市场的当前规模和预期年增长率',
         dimensionId: marketDimension.id,
+        deleted: false,
       },
       {
-        text: '市场竞争格局如何？',
+        text: '我们在市场竞争中具有优势',
         explanation: '评估主要竞争对手的数量和市场份额',
         dimensionId: marketDimension.id,
+        deleted: false,
       },
       {
-        text: '是否存在明显的市场进入壁垒？',
+        text: '我们能够有效应对市场进入壁垒',
         explanation: '考虑监管、技术、资金等方面的进入壁垒',
         dimensionId: marketDimension.id,
+        deleted: false,
       },
 
       // 运营能力维度的问题
       {
-        text: '是否建立了完善的供应链体系？',
+        text: '我们建立了完善的供应链体系',
         explanation: '评估供应商管理、库存控制等方面',
         dimensionId: operationDimension.id,
+        deleted: false,
       },
       {
-        text: '是否具备足够的人力资源？',
+        text: '我们具备充足的人力资源',
         explanation: '考虑人才储备和招聘能力',
         dimensionId: operationDimension.id,
+        deleted: false,
       },
       {
-        text: '是否有效的质量控制体系？',
+        text: '我们拥有有效的质量控制体系',
         explanation: '评估产品/服务质量管理能力',
         dimensionId: operationDimension.id,
+        deleted: false,
       },
 
       // 本地化能力维度的问题
       {
-        text: '是否了解当地文化和消费习惯？',
+        text: '我们深入了解当地文化和消费习惯',
         explanation: '评估对目标市场文化的理解程度',
         dimensionId: localizationDimension.id,
+        deleted: false,
       },
       {
-        text: '是否具备本地化的营销能力？',
+        text: '我们具备本地化的营销能力',
         explanation: '考虑营销策略的本地化程度',
         dimensionId: localizationDimension.id,
+        deleted: false,
       },
       {
-        text: '是否建立了本地合作伙伴关系？',
+        text: '我们已建立稳固的本地合作伙伴关系',
         explanation: '评估与当地合作伙伴的合作情况',
         dimensionId: localizationDimension.id,
+        deleted: false,
       },
     ],
   })

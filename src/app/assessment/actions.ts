@@ -42,7 +42,7 @@ export async function getQuestions() {
 export async function validateCompany(name: string) {
   if (!name) return null
 
-  const company = await prisma.company.findUnique({
+  const company = await prisma.company.findFirst({
     where: { name: name.trim() }
   })
 
@@ -52,7 +52,7 @@ export async function validateCompany(name: string) {
 export async function saveAssessment(companyName: string, answers: Array<{ questionId: number, answer: number }>) {
   try {
     // 获取公司信息
-    const company = await prisma.company.findUnique({
+    const company = await prisma.company.findFirst({
       where: { name: companyName }
     })
 
@@ -64,10 +64,10 @@ export async function saveAssessment(companyName: string, answers: Array<{ quest
     const validAnswers = answers.filter(item => item.answer !== null)
 
     // 创建评估记录
-    const assessment = await prisma.companyAssessment.create({
+    const assessment = await prisma.assessment.create({
       data: {
         companyId: company.id,
-        answers: validAnswers
+        answers: JSON.stringify(validAnswers)
       }
     })
 
