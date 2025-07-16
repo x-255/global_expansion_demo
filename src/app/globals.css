@@ -9,6 +9,23 @@
   --text-secondary: #86868b;
 }
 
+@theme {
+  --color-primary: #CC4F3D;
+  --color-gold: #B79F67;
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+  --color-gray-1: #222222;
+  --color-gray-2: #444444;
+  --color-gray-3: #D1D3D4;
+  --color-gray-4: #F8F8F8;
+  --color-gray-dark: #58595B;
+  --color-gray-medium: #949494;
+  --color-gray-light: #EBEBEB;
+  --color-blue: #3D5D6F;
+  --color-blue-light: #8DA7B8;
+  --color-danger: #E61717;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

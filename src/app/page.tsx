@@ -75,56 +75,21 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-black">
       <DynamicBackground />
 
-      {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glassmorphism">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
-          <div className="flex items-center">
-            <Image
-              src="/globe.svg"
-              alt="Logo"
-              width={24}
-              height={24}
-              className="mr-2"
-            />
-            <span className="text-lg font-medium text-gray-900">
-              企业出海能力评估
-            </span>
-          </div>
-          <div className="flex items-center space-x-8">
-            <a
-              href="#features"
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              特色功能
-            </a>
-            <a
-              href="#process"
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              评估流程
-            </a>
-            <a href="#start" className="btn-apple text-sm">
-              开始评估
-            </a>
-          </div>
-        </div>
-      </nav>
-
       {/* 主要内容区域 */}
-      <main className="flex-grow pt-12">
+      <main className="flex-grow pt-12 bg-black">
         {/* Hero部分 */}
-        <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
+        <section className="relative flex items-center justify-center py-20 overflow-hidden bg-black">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center animate-fade-in">
-              <h1 className="text-6xl font-bold mb-6">
-                <span className="gradient-text">全球化发展</span>
+              <h1 className="text-6xl font-bold mb-6 text-primary">
+                全球化发展
                 <br />
-                从这里起航
+                <span className="text-gold">从这里起航</span>
               </h1>
-              <p className="text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
+              <p className="text-xl text-gray-3 mb-6 max-w-2xl mx-auto">
                 通过科学的评估体系和AI智能分析，帮助企业发现优势与短板，
                 制定精准的国际化发展战略。
               </p>
@@ -135,12 +100,12 @@ export default function Home() {
         {/* 特色功能部分 */}
         <section
           id="features"
-          className="py-32 relative overflow-hidden bg-gray-50"
+          className="py-32 relative overflow-hidden bg-black"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20 animate-fade-in">
-              <h2 className="text-4xl font-bold mb-4">特色功能</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <h2 className="text-4xl font-bold mb-4 text-primary">特色功能</h2>
+              <p className="text-xl text-gray-dark max-w-2xl mx-auto">
                 我们提供全面的企业出海能力评估解决方案，助力企业在全球市场取得成功
               </p>
             </div>
@@ -148,22 +113,21 @@ export default function Home() {
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className="animate-scale-float bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300"
+                  className="animate-scale-float bg-gray-2 rounded-3xl p-8 shadow-md transition-all duration-300"
                   style={{ animationDelay: `${index * 0.2}s` }}
                 >
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-purple-100 rounded-2xl flex items-center justify-center mb-6">
+                  <div className="w-16 h-16 bg-gold rounded-2xl flex items-center justify-center mb-6">
                     <Image
                       src={feature.icon}
                       alt={feature.title}
                       width={32}
                       height={32}
-                      className="text-primary"
                     />
                   </div>
-                  <h3 className="text-2xl font-semibold mb-4 text-gray-800">
-                    {feature.title}
+                  <h3 className="text-2xl font-semibold mb-4 text-primary">
+                    <span className="text-white">{feature.title}</span>
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-white leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -173,11 +137,11 @@ export default function Home() {
         </section>
 
         {/* 评估流程部分 */}
-        <section id="process" className="py-32 bg-white">
+        <section id="process" className="py-32 bg-black">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
-              <h2 className="text-4xl font-bold mb-4">评估流程</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <h2 className="text-4xl font-bold mb-4 text-primary">评估流程</h2>
+              <p className="text-xl text-gray-dark max-w-2xl mx-auto">
                 简单四步，帮助您全面了解企业出海能力现状，获取专业改进建议
               </p>
             </div>
@@ -188,14 +152,14 @@ export default function Home() {
                   className="relative animate-float h-full"
                   style={{ animationDelay: `${index * 0.2}s` }}
                 >
-                  <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col">
+                  <div className="bg-gray-2 rounded-3xl p-8 shadow-md h-full flex flex-col">
                     <div className="text-5xl font-bold text-primary/20 mb-6">
-                      {step.number}
+                      <span className="text-gold">{step.number}</span>
                     </div>
-                    <h3 className="text-2xl font-semibold mb-4">
-                      {step.title}
+                    <h3 className="text-2xl font-semibold mb-4 text-primary">
+                      <span className="text-white">{step.title}</span>
                     </h3>
-                    <p className="text-gray-600 flex-1">{step.description}</p>
+                    <p className="text-white flex-1">{step.description}</p>
                   </div>
                   {index < steps.length - 1 && (
                     <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
@@ -215,49 +179,45 @@ export default function Home() {
         </section>
 
         {/* 开始评估部分 */}
-        <section id="start" className="py-32 bg-gray-50">
+        <section id="start" className="py-32 bg-black">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-gradient-to-br from-primary/5 to-purple-50 rounded-3xl p-12 shadow-xl">
+            <div className="bg-gray-2 rounded-3xl p-12 shadow-md">
               <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold mb-4">开始您的评估之旅</h2>
-                <p className="text-xl text-gray-600">
+                <h2 className="text-4xl font-bold mb-4 text-primary">
+                  <span className="text-white">开始您的评估之旅</span>
+                </h2>
+                <p className="text-xl text-white">
                   输入企业名称，立即获取专业的出海能力评估报告
                 </p>
               </div>
 
               <form onSubmit={handleStartAssessment} className="space-y-6">
                 <div>
-                  <label
-                    htmlFor="companyName"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    企业名称
-                  </label>
                   <input
                     id="companyName"
                     type="text"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder="请输入企业名称"
-                    className="w-full px-6 py-4 text-lg border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow"
+                    className="w-full px-6 py-4 text-lg border border-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-shadow bg-gray-2 text-white"
                     required
                   />
                   {error && (
-                    <p className="mt-2 text-sm text-red-600">{error}</p>
+                    <p className="mt-2 text-sm text-danger">{error}</p>
                   )}
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full btn-apple text-lg py-4"
+                  className="w-full btn-apple text-lg py-4 bg-primary text-white hover:bg-gold"
                 >
                   {isLoading ? '处理中...' : '立即开始评估'}
                 </button>
               </form>
 
               <div className="mt-8 text-center">
-                <p className="text-gray-600 mb-6">完成评估后，您将获得：</p>
+                <p className="text-white mb-6">完成评估后，您将获得：</p>
                 <div className="grid grid-cols-2 gap-6 text-left">
                   {[
                     '详细的能力评估报告',
@@ -267,7 +227,7 @@ export default function Home() {
                   ].map((item, index) => (
                     <div
                       key={index}
-                      className="flex items-center bg-white/50 rounded-xl p-4 shadow-sm"
+                      className="flex items-center bg-gray-2 rounded-xl p-4 shadow-sm"
                     >
                       <Image
                         src="/check-circle.svg"
@@ -276,7 +236,7 @@ export default function Home() {
                         height={20}
                         className="mr-3"
                       />
-                      <span className="text-gray-700">{item}</span>
+                      <span className="text-white">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -287,7 +247,7 @@ export default function Home() {
       </main>
 
       {/* 页脚 */}
-      <footer className="bg-gray-50 py-16">
+      <footer className="bg-black py-16 border-t border-gray-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-8 md:mb-0">
@@ -298,11 +258,11 @@ export default function Home() {
                 height={32}
                 className="mr-3"
               />
-              <span className="text-xl font-bold gradient-text">
+              <span className="text-xl font-bold text-primary">
                 企业出海能力评估
               </span>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-3">
               © {new Date().getFullYear()} 企业出海能力评估. All rights
               reserved.
             </div>
