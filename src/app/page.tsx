@@ -51,23 +51,23 @@ export default function Home() {
   const steps = [
     {
       number: '01',
-      title: '注册企业',
-      description: '输入企业名称，系统自动为您创建企业档案'
+      title: '能力自测',
+      description: '通过科学问卷，系统评估制造业企业的业务能力成熟度，精准定位发展阶段'
     },
     {
       number: '02',
-      title: '完成评估',
-      description: '回答精心设计的评估问题，全面了解企业现状'
+      title: '获取专属报告',
+      description: '自动生成详尽的成熟度分析报告，清晰展现企业优势与短板'
     },
     {
       number: '03',
-      title: '获取报告',
-      description: '系统生成专业的分析报告，提供详细的改进建议'
+      title: '出海能力评估',
+      description: '基于成熟度模型，深入诊断企业的国际化与出海准备度'
     },
     {
       number: '04',
-      title: '执行方案',
-      description: '根据建议制定并实施改进计划，提升企业竞争力'
+      title: 'AI智能出海方案',
+      description: 'AI驱动，一站式定制企业专属的智能化出海提升与落地解决方案'
     }
   ]
 
@@ -145,13 +145,13 @@ export default function Home() {
                 简单四步，帮助您全面了解企业出海能力现状，获取专业改进建议
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-stretch">
               {steps.map((step, index) => (
-                <div key={index} className="relative animate-float" style={{animationDelay: `${index * 0.2}s`}}>
-                  <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+                <div key={index} className="relative animate-float h-full" style={{animationDelay: `${index * 0.2}s`}}>
+                  <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col">
                     <div className="text-5xl font-bold text-primary/20 mb-6">{step.number}</div>
                     <h3 className="text-2xl font-semibold mb-4">{step.title}</h3>
-                    <p className="text-gray-600">{step.description}</p>
+                    <p className="text-gray-600 flex-1">{step.description}</p>
                   </div>
                   {index < steps.length - 1 && (
                     <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
