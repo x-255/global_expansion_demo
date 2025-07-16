@@ -100,4 +100,4 @@ export function AssessmentsList({ params }: Props) {
       </div>
     </div>
   )
-} 
+}

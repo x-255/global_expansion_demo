@@ -9,14 +9,24 @@ import { AnalysisReport } from './components/AnalysisReport'
 import type { Dimension, Question } from '@/generated/prisma/client'
 
 // 计算单个维度的得分
-function calculateDimensionScore(questions: Question[], dimensionAnswers: Array<{ questionId: number, answer: number | null }>) {
-  if (questions.length === 0 || !dimensionAnswers || dimensionAnswers.length === 0) return 0
+function calculateDimensionScore(
+  questions: Question[],
+  dimensionAnswers: Array<{ questionId: number; answer: number | null }>
+) {
+  if (
+    questions.length === 0 ||
+    !dimensionAnswers ||
+    dimensionAnswers.length === 0
+  )
+    return 0
 
   let totalScore = 0
   let validAnswers = 0
 
-  questions.forEach(question => {
-    const answer = dimensionAnswers.find(a => a.questionId === question.id)?.answer
+  questions.forEach((question) => {
+    const answer = dimensionAnswers.find(
+      (a) => a.questionId === question.id
+    )?.answer
     if (answer !== null && answer !== undefined) {
       // 将0-4的选项转换为0-100的分数
       totalScore += (answer / 4) * 100
@@ -31,7 +41,9 @@ export default function ResultPage() {
   const router = useRouter()
   const { answers, clearAnswers, hydrated } = useAssessmentStore()
   const [dimensions, setDimensions] = useState<Dimension[]>([])
-  const [dimensionScores, setDimensionScores] = useState<Array<{ id: number, name: string, score: number, averageScore: number }>>([])
+  const [dimensionScores, setDimensionScores] = useState<
+    Array<{ id: number; name: string; score: number; averageScore: number }>
+  >([])
   const [totalScore, setTotalScore] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -51,29 +63,35 @@ export default function ResultPage() {
         // 加载维度数据和平均分
         const [dimensionsData, averageScores] = await Promise.all([
           getDimensions(),
-          getDimensionsAverageScores()
+          getDimensionsAverageScores(),
         ])
-        
+
         setDimensions(dimensionsData)
 
         // 计算每个维度的得分并合并平均分
-        const scores = dimensionsData.map(dim => {
+        const scores = dimensionsData.map((dim) => {
           const score = calculateDimensionScore(
             dim.questions,
-            answers.filter(a => dim.questions.some(q => q.id === a.questionId))
+            answers.filter((a) =>
+              dim.questions.some((q) => q.id === a.questionId)
+            )
           )
-          
-          const averageScore = averageScores.find(avg => avg.dimensionId === dim.id)?.averageScore || 0
+
+          const averageScore =
+            averageScores.find((avg) => avg.dimensionId === dim.id)
+              ?.averageScore || 0
 
           return {
             id: dim.id,
             name: dim.name,
             score,
-            averageScore
+            averageScore,
           }
         })
 
-        const total = Math.round(scores.reduce((sum, item) => sum + item.score, 0) / scores.length)
+        const total = Math.round(
+          scores.reduce((sum, item) => sum + item.score, 0) / scores.length
+        )
 
         setDimensionScores(scores)
         setTotalScore(total)
@@ -119,7 +137,10 @@ export default function ResultPage() {
           </div>
           <div className="text-gray-600">总分（满分100）</div>
         </div>
-        <RadarChart scores={dimensionScores.map(d => d.score)} dimensions={dimensions} />
+        <RadarChart
+          scores={dimensionScores.map((d) => d.score)}
+          dimensions={dimensions}
+        />
         <AnalysisReport dimensions={dimensionScores} />
 
         {/* 返回按钮 */}

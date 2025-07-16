@@ -20,15 +20,15 @@ export async function getQuestions(): Promise<QuestionWithDimension[]> {
       where: {
         deleted: false,
         dimension: {
-          deleted: false
-        }
+          deleted: false,
+        },
       },
       include: {
-        dimension: true
+        dimension: true,
       },
       orderBy: {
-        id: 'asc'
-      }
+        id: 'asc',
+      },
     })
     return questions
   } catch (error) {
@@ -37,13 +37,15 @@ export async function getQuestions(): Promise<QuestionWithDimension[]> {
   }
 }
 
-export async function createQuestion(data: QuestionFormData): Promise<Question> {
+export async function createQuestion(
+  data: QuestionFormData
+): Promise<Question> {
   // 检查维度是否存在且未被删除
   const dimension = await prisma.dimension.findUnique({
     where: {
       id: data.dimensionId,
-      deleted: false
-    }
+      deleted: false,
+    },
   })
 
   if (!dimension) {
@@ -55,19 +57,22 @@ export async function createQuestion(data: QuestionFormData): Promise<Question> 
       text: data.text,
       explanation: data.explanation,
       dimensionId: data.dimensionId,
-      deleted: false
-    }
+      deleted: false,
+    },
   })
   revalidatePath('/admin/questions')
   return question
 }
 
-export async function updateQuestion(id: number, data: QuestionFormData): Promise<Question> {
+export async function updateQuestion(
+  id: number,
+  data: QuestionFormData
+): Promise<Question> {
   const question = await prisma.question.findUnique({
-    where: { 
+    where: {
       id,
-      deleted: false
-    }
+      deleted: false,
+    },
   })
 
   if (!question) {
@@ -78,8 +83,8 @@ export async function updateQuestion(id: number, data: QuestionFormData): Promis
   const dimension = await prisma.dimension.findUnique({
     where: {
       id: data.dimensionId,
-      deleted: false
-    }
+      deleted: false,
+    },
   })
 
   if (!dimension) {
@@ -91,8 +96,8 @@ export async function updateQuestion(id: number, data: QuestionFormData): Promis
     data: {
       text: data.text,
       explanation: data.explanation,
-      dimensionId: data.dimensionId
-    }
+      dimensionId: data.dimensionId,
+    },
   })
 
   revalidatePath('/admin/questions')
@@ -101,10 +106,10 @@ export async function updateQuestion(id: number, data: QuestionFormData): Promis
 
 export async function deleteQuestion(id: number): Promise<void> {
   const question = await prisma.question.findUnique({
-    where: { 
+    where: {
       id,
-      deleted: false
-    }
+      deleted: false,
+    },
   })
 
   if (!question) {
@@ -113,8 +118,8 @@ export async function deleteQuestion(id: number): Promise<void> {
 
   await prisma.question.update({
     where: { id },
-    data: { deleted: true }
+    data: { deleted: true },
   })
 
   revalidatePath('/admin/questions')
-} 
+}

@@ -26,7 +26,9 @@ export async function middleware(request: NextRequest) {
 
     if (!token) {
       console.log('token不存在，重定向到登录页')
-      const response = NextResponse.redirect(new URL('/admin/login', request.url))
+      const response = NextResponse.redirect(
+        new URL('/admin/login', request.url)
+      )
       console.log('重定向响应:', response)
       return response
     }
@@ -46,5 +48,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/admin/:path*'
-} 
+  matcher: '/admin/:path*',
+}

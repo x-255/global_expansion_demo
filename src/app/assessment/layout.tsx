@@ -13,7 +13,7 @@ export default async function AssessmentLayout({
   children: React.ReactNode
 }) {
   const companyName = await getCompanyCookie()
-  
+
   if (!companyName) {
     redirect('/')
   }

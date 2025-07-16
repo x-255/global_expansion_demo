@@ -7,7 +7,9 @@ interface Props {
   }[]
 }
 
-const getDimensionLevel = (score: number): { level: string; description: string; color: string } => {
+const getDimensionLevel = (
+  score: number
+): { level: string; description: string; color: string } => {
   if (score >= 90) {
     return {
       level: '卓越水平',
@@ -56,31 +58,44 @@ const getDimensionLevel = (score: number): { level: string; description: string;
 export function AnalysisReport({ dimensions }: Props) {
   // 按分数从高到低排序
   const sortedDimensions = [...dimensions].sort((a, b) => b.score - a.score)
-  
+
   return (
     <div className="mt-12 p-6 bg-gray-50 rounded-xl">
       <h2 className="text-2xl font-semibold mb-6">维度分析</h2>
       <div className="space-y-4">
         {sortedDimensions.map((dimension) => {
-          const { level, description, color } = getDimensionLevel(dimension.score)
-          
+          const { level, description, color } = getDimensionLevel(
+            dimension.score
+          )
+
           return (
-            <div key={dimension.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div
+              key={dimension.id}
+              className="bg-white rounded-lg shadow-sm overflow-hidden"
+            >
               <div className="p-4 border-b border-gray-100">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-medium text-gray-800">{dimension.name}</h3>
-                  <div className={`${color} text-white font-medium px-4 py-1.5 rounded-full text-sm`}>
+                  <h3 className="text-xl font-medium text-gray-800">
+                    {dimension.name}
+                  </h3>
+                  <div
+                    className={`${color} text-white font-medium px-4 py-1.5 rounded-full text-sm`}
+                  >
                     {level}
                   </div>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-6">
                   <div>
                     <div className="text-sm text-gray-500">得分</div>
-                    <div className="text-2xl font-semibold mt-1">{dimension.score}分</div>
+                    <div className="text-2xl font-semibold mt-1">
+                      {dimension.score}分
+                    </div>
                   </div>
                   <div>
                     <div className="text-sm text-gray-500">行业平均分</div>
-                    <div className="text-2xl font-semibold mt-1">{dimension.averageScore}分</div>
+                    <div className="text-2xl font-semibold mt-1">
+                      {dimension.averageScore}分
+                    </div>
                   </div>
                 </div>
               </div>

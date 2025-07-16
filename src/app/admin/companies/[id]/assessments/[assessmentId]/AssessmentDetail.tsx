@@ -1,7 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { Dimension, Question, CompanyAssessment } from '@/generated/prisma/client'
+import type {
+  Dimension,
+  Question,
+  CompanyAssessment,
+} from '@/generated/prisma/client'
 
 interface Props {
   dimensions: (Dimension & { questions: Question[] })[]
@@ -26,9 +30,11 @@ export function AssessmentDetail({ dimensions, params }: Props) {
     const loadData = async () => {
       try {
         // 加载评估记录
-        const assessmentData = await fetch(`/api/assessments/${params.assessmentId}`).then(res => res.json())
+        const assessmentData = await fetch(
+          `/api/assessments/${params.assessmentId}`
+        ).then((res) => res.json())
         setAssessment(assessmentData)
-        
+
         // 处理answers数据
         let parsedAnswers: Answer[] = []
         if (assessmentData.answers) {
@@ -114,9 +120,9 @@ export function AssessmentDetail({ dimensions, params }: Props) {
 
             <div className="space-y-6">
               {dimension.questions.map((question) => {
-                const answer = answers.find(a => a.questionId === question.id)
+                const answer = answers.find((a) => a.questionId === question.id)
                 if (!answer) return null // 如果没有回答，不显示这个问题
-                
+
                 return (
                   <div key={question.id} className="border-t pt-4">
                     <div className="flex items-start">
@@ -130,7 +136,9 @@ export function AssessmentDetail({ dimensions, params }: Props) {
                           )}
                         </div>
                         {question.explanation && (
-                          <p className="text-sm text-gray-500 mb-2">{question.explanation}</p>
+                          <p className="text-sm text-gray-500 mb-2">
+                            {question.explanation}
+                          </p>
                         )}
                         <div className="mt-2">
                           <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
@@ -148,4 +156,4 @@ export function AssessmentDetail({ dimensions, params }: Props) {
       </div>
     </div>
   )
-} 
+}

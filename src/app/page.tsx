@@ -33,59 +33,82 @@ export default function Home() {
   const features = [
     {
       title: '科学的评估模型',
-      description: '基于制造业企业业务能力成熟度模型，结合国际化发展特点，提供全面的能力评估',
-      icon: '/check-circle.svg'
+      description:
+        '基于制造业企业业务能力成熟度模型，结合国际化发展特点，提供全面的能力评估',
+      icon: '/check-circle.svg',
     },
     {
       title: 'AI智能分析',
-      description: '运用先进的AI技术，对企业数据进行深度分析，提供个性化的发展建议',
-      icon: '/globe.svg'
+      description:
+        '运用先进的AI技术，对企业数据进行深度分析，提供个性化的发展建议',
+      icon: '/globe.svg',
     },
     {
       title: '一站式解决方案',
       description: '从评估到建议，再到具体实施方案，提供完整的企业出海支持',
-      icon: '/window.svg'
-    }
+      icon: '/window.svg',
+    },
   ]
 
   const steps = [
     {
       number: '01',
       title: '能力自测',
-      description: '通过科学问卷，系统评估制造业企业的业务能力成熟度，精准定位发展阶段'
+      description:
+        '通过科学问卷，系统评估制造业企业的业务能力成熟度，精准定位发展阶段',
     },
     {
       number: '02',
       title: '获取专属报告',
-      description: '自动生成详尽的成熟度分析报告，清晰展现企业优势与短板'
+      description: '自动生成详尽的成熟度分析报告，清晰展现企业优势与短板',
     },
     {
       number: '03',
       title: '出海能力评估',
-      description: '基于成熟度模型，深入诊断企业的国际化与出海准备度'
+      description: '基于成熟度模型，深入诊断企业的国际化与出海准备度',
     },
     {
       number: '04',
       title: 'AI智能出海方案',
-      description: 'AI驱动，一站式定制企业专属的智能化出海提升与落地解决方案'
-    }
+      description: 'AI驱动，一站式定制企业专属的智能化出海提升与落地解决方案',
+    },
   ]
 
   return (
     <div className="min-h-screen flex flex-col">
       <DynamicBackground />
-      
+
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 glassmorphism">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
           <div className="flex items-center">
-            <Image src="/globe.svg" alt="Logo" width={24} height={24} className="mr-2" />
-            <span className="text-lg font-medium text-gray-900">企业出海能力评估</span>
+            <Image
+              src="/globe.svg"
+              alt="Logo"
+              width={24}
+              height={24}
+              className="mr-2"
+            />
+            <span className="text-lg font-medium text-gray-900">
+              企业出海能力评估
+            </span>
           </div>
           <div className="flex items-center space-x-8">
-            <a href="#features" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">特色功能</a>
-            <a href="#process" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">评估流程</a>
-            <a href="#start" className="btn-apple text-sm">开始评估</a>
+            <a
+              href="#features"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              特色功能
+            </a>
+            <a
+              href="#process"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              评估流程
+            </a>
+            <a href="#start" className="btn-apple text-sm">
+              开始评估
+            </a>
           </div>
         </div>
       </nav>
@@ -110,7 +133,10 @@ export default function Home() {
         </section>
 
         {/* 特色功能部分 */}
-        <section id="features" className="py-32 relative overflow-hidden bg-gray-50">
+        <section
+          id="features"
+          className="py-32 relative overflow-hidden bg-gray-50"
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20 animate-fade-in">
               <h2 className="text-4xl font-bold mb-4">特色功能</h2>
@@ -120,16 +146,26 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {features.map((feature, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="animate-scale-float bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300"
-                  style={{animationDelay: `${index * 0.2}s`}}
+                  style={{ animationDelay: `${index * 0.2}s` }}
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-purple-100 rounded-2xl flex items-center justify-center mb-6">
-                    <Image src={feature.icon} alt={feature.title} width={32} height={32} className="text-primary" />
+                    <Image
+                      src={feature.icon}
+                      alt={feature.title}
+                      width={32}
+                      height={32}
+                      className="text-primary"
+                    />
                   </div>
-                  <h3 className="text-2xl font-semibold mb-4 text-gray-800">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-2xl font-semibold mb-4 text-gray-800">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
               ))}
             </div>
@@ -147,15 +183,29 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-stretch">
               {steps.map((step, index) => (
-                <div key={index} className="relative animate-float h-full" style={{animationDelay: `${index * 0.2}s`}}>
+                <div
+                  key={index}
+                  className="relative animate-float h-full"
+                  style={{ animationDelay: `${index * 0.2}s` }}
+                >
                   <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col">
-                    <div className="text-5xl font-bold text-primary/20 mb-6">{step.number}</div>
-                    <h3 className="text-2xl font-semibold mb-4">{step.title}</h3>
+                    <div className="text-5xl font-bold text-primary/20 mb-6">
+                      {step.number}
+                    </div>
+                    <h3 className="text-2xl font-semibold mb-4">
+                      {step.title}
+                    </h3>
                     <p className="text-gray-600 flex-1">{step.description}</p>
                   </div>
                   {index < steps.length - 1 && (
                     <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                      <Image src="/arrow-right.svg" alt="箭头" width={24} height={24} className="opacity-30" />
+                      <Image
+                        src="/arrow-right.svg"
+                        alt="箭头"
+                        width={24}
+                        height={24}
+                        className="opacity-30"
+                      />
                     </div>
                   )}
                 </div>
@@ -177,7 +227,10 @@ export default function Home() {
 
               <form onSubmit={handleStartAssessment} className="space-y-6">
                 <div>
-                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="companyName"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     企业名称
                   </label>
                   <input
@@ -189,9 +242,11 @@ export default function Home() {
                     className="w-full px-6 py-4 text-lg border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow"
                     required
                   />
-                  {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+                  {error && (
+                    <p className="mt-2 text-sm text-red-600">{error}</p>
+                  )}
                 </div>
-                
+
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -208,10 +263,19 @@ export default function Home() {
                     '详细的能力评估报告',
                     '专业团队的改进建议',
                     '个性化发展方案',
-                    '行业对标分析'
+                    '行业对标分析',
                   ].map((item, index) => (
-                    <div key={index} className="flex items-center bg-white/50 rounded-xl p-4 shadow-sm">
-                      <Image src="/check-circle.svg" alt="检查" width={20} height={20} className="mr-3" />
+                    <div
+                      key={index}
+                      className="flex items-center bg-white/50 rounded-xl p-4 shadow-sm"
+                    >
+                      <Image
+                        src="/check-circle.svg"
+                        alt="检查"
+                        width={20}
+                        height={20}
+                        className="mr-3"
+                      />
                       <span className="text-gray-700">{item}</span>
                     </div>
                   ))}
@@ -227,11 +291,20 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-8 md:mb-0">
-              <Image src="/globe.svg" alt="Logo" width={32} height={32} className="mr-3" />
-              <span className="text-xl font-bold gradient-text">企业出海能力评估</span>
+              <Image
+                src="/globe.svg"
+                alt="Logo"
+                width={32}
+                height={32}
+                className="mr-3"
+              />
+              <span className="text-xl font-bold gradient-text">
+                企业出海能力评估
+              </span>
             </div>
             <div className="text-sm text-gray-500">
-              © {new Date().getFullYear()} 企业出海能力评估. All rights reserved.
+              © {new Date().getFullYear()} 企业出海能力评估. All rights
+              reserved.
             </div>
           </div>
         </div>

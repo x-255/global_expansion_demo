@@ -13,7 +13,7 @@ export default async function ResultLayout({
   children: React.ReactNode
 }) {
   const companyName = await getCompanyCookie()
-  
+
   if (!companyName) {
     redirect('/')
   }

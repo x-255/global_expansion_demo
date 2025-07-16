@@ -48,9 +48,9 @@ export function NavigationButtons({
       ) : (
         <div />
       )}
-      
+
       <div className="flex-1" />
-      
+
       {showNextButton && (
         <button
           className="px-8 py-3 bg-green-600 text-white rounded-full text-lg font-semibold shadow-lg hover:bg-green-700 transition-all flex items-center gap-2"

@@ -8,20 +8,20 @@ export async function getDimensions() {
       deleted: false,
       questions: {
         some: {
-          deleted: false
-        }
-      }
+          deleted: false,
+        },
+      },
     },
     include: {
       questions: {
         where: {
-          deleted: false
-        }
-      }
+          deleted: false,
+        },
+      },
     },
     orderBy: {
-      id: 'asc'
-    }
+      id: 'asc',
+    },
   })
   return dimensions
 }
@@ -31,15 +31,15 @@ export async function getQuestions() {
     where: {
       deleted: false,
       dimension: {
-        deleted: false
-      }
+        deleted: false,
+      },
     },
     include: {
-      dimension: true
+      dimension: true,
     },
     orderBy: {
-      id: 'asc'
-    }
+      id: 'asc',
+    },
   })
   return questions
 }
@@ -48,17 +48,20 @@ export async function validateCompany(name: string) {
   if (!name) return null
 
   const company = await prisma.company.findFirst({
-    where: { name: name.trim() }
+    where: { name: name.trim() },
   })
 
   return company
 }
 
-export async function saveAssessment(companyName: string, answers: Array<{ questionId: number, answer: number }>) {
+export async function saveAssessment(
+  companyName: string,
+  answers: Array<{ questionId: number; answer: number }>
+) {
   try {
     // 获取公司信息
     const company = await prisma.company.findFirst({
-      where: { name: companyName }
+      where: { name: companyName },
     })
 
     if (!company) {
@@ -66,14 +69,14 @@ export async function saveAssessment(companyName: string, answers: Array<{ quest
     }
 
     // 过滤掉未回答的问题
-    const validAnswers = answers.filter(item => item.answer !== null)
+    const validAnswers = answers.filter((item) => item.answer !== null)
 
     // 创建评估记录
     const assessment = await prisma.companyAssessment.create({
       data: {
         companyId: company.id,
-        answers: JSON.stringify(validAnswers)
-      }
+        answers: JSON.stringify(validAnswers),
+      },
     })
 
     return assessment
@@ -81,4 +84,4 @@ export async function saveAssessment(companyName: string, answers: Array<{ quest
     console.error('保存评估结果失败:', error)
     throw new Error('保存评估结果失败')
   }
-} 
+}

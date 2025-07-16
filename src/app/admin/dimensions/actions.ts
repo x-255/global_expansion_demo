@@ -8,14 +8,14 @@ export async function getDimensions(): Promise<DimensionWithQuestions[]> {
   try {
     const dimensions = await prisma.dimension.findMany({
       where: {
-        deleted: false
+        deleted: false,
       },
       include: {
         questions: {
           where: {
-            deleted: false
-          }
-        }
+            deleted: false,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -28,30 +28,35 @@ export async function getDimensions(): Promise<DimensionWithQuestions[]> {
   }
 }
 
-export async function createDimension(data: DimensionFormData): Promise<DimensionWithQuestions> {
+export async function createDimension(
+  data: DimensionFormData
+): Promise<DimensionWithQuestions> {
   const dimension = await prisma.dimension.create({
     data: {
       name: data.name,
       description: data.description,
-      deleted: false
+      deleted: false,
     },
     include: {
       questions: {
         where: {
-          deleted: false
-        }
-      }
+          deleted: false,
+        },
+      },
     },
   })
   return dimension
 }
 
-export async function updateDimension(id: number, data: DimensionFormData): Promise<DimensionWithQuestions> {
+export async function updateDimension(
+  id: number,
+  data: DimensionFormData
+): Promise<DimensionWithQuestions> {
   const dimension = await prisma.dimension.findUnique({
-    where: { 
+    where: {
       id,
-      deleted: false
-    }
+      deleted: false,
+    },
   })
 
   if (!dimension) {
@@ -62,14 +67,14 @@ export async function updateDimension(id: number, data: DimensionFormData): Prom
     where: { id },
     data: {
       name: data.name,
-      description: data.description
+      description: data.description,
     },
     include: {
       questions: {
         where: {
-          deleted: false
-        }
-      }
+          deleted: false,
+        },
+      },
     },
   })
 
@@ -79,17 +84,17 @@ export async function updateDimension(id: number, data: DimensionFormData): Prom
 
 export async function deleteDimension(id: number): Promise<void> {
   const dimension = await prisma.dimension.findUnique({
-    where: { 
+    where: {
       id,
-      deleted: false
+      deleted: false,
     },
     include: {
       questions: {
         where: {
-          deleted: false
-        }
-      }
-    }
+          deleted: false,
+        },
+      },
+    },
   })
 
   if (!dimension) {
@@ -101,20 +106,20 @@ export async function deleteDimension(id: number): Promise<void> {
     await prisma.$transaction([
       prisma.question.updateMany({
         where: { dimensionId: id },
-        data: { deleted: true }
+        data: { deleted: true },
       }),
       prisma.dimension.update({
         where: { id },
-        data: { deleted: true }
-      })
+        data: { deleted: true },
+      }),
     ])
   } else {
     // 如果没有关联的题目，只标记维度为已删除
     await prisma.dimension.update({
       where: { id },
-      data: { deleted: true }
+      data: { deleted: true },
     })
   }
 
   revalidatePath('/admin/dimensions')
-} 
+}

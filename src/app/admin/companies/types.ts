@@ -21,7 +21,8 @@ export interface CompanyAssessment {
   updatedAt: Date
 }
 
-export interface AssessmentWithScore extends Omit<CompanyAssessment, 'company'> {
+export interface AssessmentWithScore
+  extends Omit<CompanyAssessment, 'company'> {
   company: Omit<Company, 'assessments'>
   totalScore: number
   dimensionScores: Array<{
@@ -29,4 +30,4 @@ export interface AssessmentWithScore extends Omit<CompanyAssessment, 'company'> 
     dimensionName: string
     score: number
   }>
-} 
+}

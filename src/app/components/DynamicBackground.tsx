@@ -71,15 +71,15 @@ export const DynamicBackground = () => {
     const animate = () => {
       if (!canvas || !ctx) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
-      particles.forEach(particle => {
+
+      particles.forEach((particle) => {
         particle.update()
         particle.draw(ctx)
       })
 
       // 绘制连线
-      particles.forEach(particle1 => {
-        particles.forEach(particle2 => {
+      particles.forEach((particle1) => {
+        particles.forEach((particle2) => {
           const dx = particle1.x - particle2.x
           const dy = particle1.y - particle2.y
           const distance = Math.sqrt(dx * dx + dy * dy)
@@ -111,4 +111,4 @@ export const DynamicBackground = () => {
       className="fixed top-0 left-0 w-full h-full pointer-events-none opacity-30"
     />
   )
-} 
+}

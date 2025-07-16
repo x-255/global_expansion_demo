@@ -46,9 +46,7 @@ export function Question({
             {question.text}
           </div>
           {question.explanation && (
-            <div className="mt-2 text-gray-600">
-              {question.explanation}
-            </div>
+            <div className="mt-2 text-gray-600">{question.explanation}</div>
           )}
         </div>
       </div>

@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { createQuestion, updateQuestion, type QuestionWithDimension } from '../actions'
+import {
+  createQuestion,
+  updateQuestion,
+  type QuestionWithDimension,
+} from '../actions'
 import type { QuestionFormData } from '../types'
 import { Dimension } from '../../dimensions/types'
 
@@ -9,7 +13,11 @@ interface QuestionFormProps {
   onClose: () => void
 }
 
-export default function QuestionForm({ question, dimensions, onClose }: QuestionFormProps) {
+export default function QuestionForm({
+  question,
+  dimensions,
+  onClose,
+}: QuestionFormProps) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -22,9 +30,12 @@ export default function QuestionForm({ question, dimensions, onClose }: Question
     const data: QuestionFormData = {
       text: formData.get('text') as string,
       dimensionId: parseInt(formData.get('dimensionId') as string, 10),
-      explanation: (formData.get('explanation') ?? '') === '' ? null : (formData.get('explanation') as string)
+      explanation:
+        (formData.get('explanation') ?? '') === ''
+          ? null
+          : (formData.get('explanation') as string),
     }
-    
+
     try {
       if (question) {
         await updateQuestion(question.id, data)
@@ -45,7 +56,7 @@ export default function QuestionForm({ question, dimensions, onClose }: Question
         <h2 className="text-xl font-bold mb-4">
           {question ? '编辑题目' : '添加题目'}
         </h2>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -91,9 +102,7 @@ export default function QuestionForm({ question, dimensions, onClose }: Question
             />
           </div>
 
-          {error && (
-            <div className="mb-4 text-red-500 text-sm">{error}</div>
-          )}
+          {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
 
           <div className="flex justify-end gap-4">
             <button
@@ -116,4 +125,4 @@ export default function QuestionForm({ question, dimensions, onClose }: Question
       </div>
     </div>
   )
-} 
+}

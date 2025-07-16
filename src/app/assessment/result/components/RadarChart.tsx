@@ -27,7 +27,7 @@ interface RadarChartProps {
 
 export function RadarChart({ scores, dimensions }: RadarChartProps) {
   const data = {
-    labels: dimensions.map(d => d.name),
+    labels: dimensions.map((d) => d.name),
     datasets: [
       {
         label: '得分',
@@ -65,4 +65,4 @@ export function RadarChart({ scores, dimensions }: RadarChartProps) {
       <Radar data={data} options={options} />
     </div>
   )
-} 
+}

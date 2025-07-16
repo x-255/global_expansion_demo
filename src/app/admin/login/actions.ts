@@ -16,7 +16,7 @@ interface LoginData {
 
 export async function login(data: LoginData) {
   const admin = await prisma.admin.findUnique({
-    where: { username: data.username }
+    where: { username: data.username },
   })
 
   if (!admin) {
@@ -29,10 +29,10 @@ export async function login(data: LoginData) {
   }
 
   // 生成JWT token
-  const token = await new jose.SignJWT({ 
+  const token = await new jose.SignJWT({
     sub: String(admin.id),
     username: admin.username,
-    name: admin.name
+    name: admin.name,
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('24h')
@@ -47,7 +47,7 @@ export async function login(data: LoginData) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 24 * 60 * 60 // 24小时（以秒为单位）
+    maxAge: 24 * 60 * 60, // 24小时（以秒为单位）
   })
 
   // 返回一个普通对象
@@ -56,8 +56,8 @@ export async function login(data: LoginData) {
     data: {
       id: admin.id,
       username: admin.username,
-      name: admin.name
-    }
+      name: admin.name,
+    },
   }
 }
 
@@ -70,10 +70,10 @@ export async function logout() {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 0
+    maxAge: 0,
   })
-  
+
   return {
-    success: true
+    success: true,
   }
-} 
+}

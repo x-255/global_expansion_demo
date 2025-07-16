@@ -10,4 +10,4 @@ export interface AdminFormData {
   username: string
   password: string
   name?: string
-} 
+}

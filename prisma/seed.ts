@@ -15,8 +15,8 @@ async function main() {
     data: {
       username: 'admin',
       password: hashedPassword,
-      name: '系统管理员'
-    }
+      name: '系统管理员',
+    },
   })
 
   // 创建维度
@@ -119,4 +119,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect()
-  }) 
+  })

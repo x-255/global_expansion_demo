@@ -7,7 +7,10 @@ interface DimensionFormProps {
   onClose: () => void
 }
 
-export default function DimensionForm({ dimension, onClose }: DimensionFormProps) {
+export default function DimensionForm({
+  dimension,
+  onClose,
+}: DimensionFormProps) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -42,7 +45,7 @@ export default function DimensionForm({ dimension, onClose }: DimensionFormProps
         <h2 className="text-xl font-bold mb-4">
           {dimension ? '编辑维度' : '添加维度'}
         </h2>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -70,9 +73,7 @@ export default function DimensionForm({ dimension, onClose }: DimensionFormProps
             />
           </div>
 
-          {error && (
-            <div className="mb-4 text-red-500 text-sm">{error}</div>
-          )}
+          {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
 
           <div className="flex justify-end space-x-4">
             <button
@@ -95,4 +96,4 @@ export default function DimensionForm({ dimension, onClose }: DimensionFormProps
       </div>
     </div>
   )
-} 
+}

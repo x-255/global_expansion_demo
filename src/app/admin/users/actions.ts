@@ -9,15 +9,15 @@ import type { AdminFormData } from './types'
 export async function getAdmins() {
   const admins = await prisma.admin.findMany({
     orderBy: {
-      createdAt: 'desc'
+      createdAt: 'desc',
     },
     select: {
       id: true,
       username: true,
       name: true,
       createdAt: true,
-      updatedAt: true
-    }
+      updatedAt: true,
+    },
   })
   return admins
 }
@@ -25,13 +25,13 @@ export async function getAdmins() {
 // 创建新管理员
 export async function createAdmin(data: AdminFormData) {
   const hashedPassword = await hash(data.password, 10)
-  
+
   const admin = await prisma.admin.create({
     data: {
       username: data.username,
       password: hashedPassword,
-      name: data.name || null
-    }
+      name: data.name || null,
+    },
   })
 
   revalidatePath('/admin/users')
@@ -48,7 +48,7 @@ export async function updateAdmin(id: number, data: AdminFormData) {
 
   const updateData: UpdateData = {
     username: data.username,
-    name: data.name || null
+    name: data.name || null,
   }
 
   // 如果提供了新密码，则更新密码
@@ -58,7 +58,7 @@ export async function updateAdmin(id: number, data: AdminFormData) {
 
   const admin = await prisma.admin.update({
     where: { id },
-    data: updateData
+    data: updateData,
   })
 
   revalidatePath('/admin/users')
@@ -74,8 +74,8 @@ export async function deleteAdmin(id: number) {
   }
 
   await prisma.admin.delete({
-    where: { id }
+    where: { id },
   })
 
   revalidatePath('/admin/users')
-} 
+}

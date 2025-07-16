@@ -9,4 +9,4 @@ export interface DimensionFormData {
 
 export interface DimensionWithQuestions extends Dimension {
   questions: Question[]
-} 
+}

@@ -16,12 +16,12 @@ interface Answer {
 export default async function AssessmentDetailPage({ params }: Props) {
   // 等待参数解析完成
   const resolvedParams = await params
-  
+
   // 先获取评估记录
   const assessment = await prisma.companyAssessment.findUnique({
     where: {
-      id: parseInt(resolvedParams.assessmentId)
-    }
+      id: parseInt(resolvedParams.assessmentId),
+    },
   })
 
   if (!assessment) {
@@ -30,7 +30,7 @@ export default async function AssessmentDetailPage({ params }: Props) {
 
   // 解析已回答的问题ID
   const answers = JSON.parse(assessment.answers as string) as Answer[]
-  const answeredQuestionIds = answers.map(a => a.questionId)
+  const answeredQuestionIds = answers.map((a) => a.questionId)
 
   // 加载所有维度和相关的问题（包括已删除的）
   const dimensions = await prisma.dimension.findMany({
@@ -38,18 +38,20 @@ export default async function AssessmentDetailPage({ params }: Props) {
       questions: {
         where: {
           id: {
-            in: answeredQuestionIds
-          }
-        }
-      }
+            in: answeredQuestionIds,
+          },
+        },
+      },
     },
     orderBy: {
-      id: 'asc'
-    }
+      id: 'asc',
+    },
   })
 
   // 过滤掉没有任何已回答问题的维度
-  const filteredDimensions = dimensions.filter(d => d.questions.length > 0)
-  
-  return <AssessmentDetail dimensions={filteredDimensions} params={resolvedParams} />
-} 
+  const filteredDimensions = dimensions.filter((d) => d.questions.length > 0)
+
+  return (
+    <AssessmentDetail dimensions={filteredDimensions} params={resolvedParams} />
+  )
+}

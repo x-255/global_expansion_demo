@@ -8,7 +8,10 @@ import CalculatingAnimation from './components/CalculatingAnimation'
 import { Question } from './components/Question'
 import { ProgressBar } from './components/ProgressBar'
 import { NavigationButtons } from './components/NavigationButtons'
-import type { Dimension as PrismaDimension, Question as PrismaQuestion } from '@/generated/prisma/client'
+import type {
+  Dimension as PrismaDimension,
+  Question as PrismaQuestion,
+} from '@/generated/prisma/client'
 
 interface Dimension extends PrismaDimension {
   questions: PrismaQuestion[]
@@ -53,20 +56,22 @@ export default function AssessmentPage() {
           throw new Error('未找到评估数据')
         }
         // 过滤掉没有题目的维度
-        const filteredDimensions = dimensionsData.filter(d => d.questions.length > 0)
+        const filteredDimensions = dimensionsData.filter(
+          (d) => d.questions.length > 0
+        )
         if (filteredDimensions.length === 0) {
           throw new Error('未找到有效的评估数据')
         }
         setDimensions(filteredDimensions)
-        
+
         // 等待 store hydration 完成后再处理答案
         if (hydrated) {
           if (!answers || answers.length === 0) {
             // 初始化空的答案数组
-            const initialAnswers = filteredDimensions.flatMap(dim => 
-              dim.questions.map(q => ({
+            const initialAnswers = filteredDimensions.flatMap((dim) =>
+              dim.questions.map((q) => ({
                 questionId: q.id,
-                answer: null
+                answer: null,
               }))
             )
             setAnswers(initialAnswers)
@@ -75,7 +80,9 @@ export default function AssessmentPage() {
         setLoading(false)
       } catch (error) {
         console.error('加载数据失败:', error)
-        setError(error instanceof Error ? error.message : '加载数据失败，请稍后重试')
+        setError(
+          error instanceof Error ? error.message : '加载数据失败，请稍后重试'
+        )
         setLoading(false)
       }
     }
@@ -88,12 +95,15 @@ export default function AssessmentPage() {
   // 初始化时检查已回答的题目，自动切换到最后回答的组别
   useEffect(() => {
     if (answers && answers.length > 0 && dimensions.length > 0) {
-      const lastAnsweredGroup = dimensions.reduce((lastGroup, dimension, currentGroup) => {
-        const hasAnswers = dimension.questions.some(q => 
-          answers.some(a => a.questionId === q.id && a.answer !== null)
-        )
-        return hasAnswers ? currentGroup : lastGroup
-      }, 0)
+      const lastAnsweredGroup = dimensions.reduce(
+        (lastGroup, dimension, currentGroup) => {
+          const hasAnswers = dimension.questions.some((q) =>
+            answers.some((a) => a.questionId === q.id && a.answer !== null)
+          )
+          return hasAnswers ? currentGroup : lastGroup
+        },
+        0
+      )
 
       if (lastAnsweredGroup > 0) {
         setGroupIdx(lastAnsweredGroup)
@@ -123,7 +133,7 @@ export default function AssessmentPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <div className="text-red-500 text-lg">{error}</div>
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
@@ -142,8 +152,8 @@ export default function AssessmentPage() {
   }
 
   // 当前组所有题目是否已作答
-  const currentGroupAllAnswered = dimensions[groupIdx].questions.every(q => 
-    answers.some(a => a.questionId === q.id && a.answer !== null)
+  const currentGroupAllAnswered = dimensions[groupIdx].questions.every((q) =>
+    answers.some((a) => a.questionId === q.id && a.answer !== null)
   )
 
   // 计算总体完成度
@@ -151,15 +161,13 @@ export default function AssessmentPage() {
     (sum, d) => sum + d.questions.length,
     0
   )
-  const answeredCount = answers.filter(a => a.answer !== null).length
+  const answeredCount = answers.filter((a) => a.answer !== null).length
   const progress = Math.round((answeredCount / totalQuestions) * 100)
 
   const handleSelect = (qIdx: number, optIdx: number) => {
     const questionId = dimensions[groupIdx].questions[qIdx].id
-    const newAnswers = answers.map(a => 
-      a.questionId === questionId 
-        ? { ...a, answer: optIdx }
-        : a
+    const newAnswers = answers.map((a) =>
+      a.questionId === questionId ? { ...a, answer: optIdx } : a
     )
     setAnswers(newAnswers)
 
@@ -179,10 +187,10 @@ export default function AssessmentPage() {
     setIsSimulating(true)
 
     // 生成所有答案
-    const newAnswers = dimensions.flatMap(dim =>
-      dim.questions.map(q => ({
+    const newAnswers = dimensions.flatMap((dim) =>
+      dim.questions.map((q) => ({
         questionId: q.id,
-        answer: Math.floor(Math.random() * 5)
+        answer: Math.floor(Math.random() * 5),
       }))
     )
     setAnswers(newAnswers)
@@ -196,18 +204,21 @@ export default function AssessmentPage() {
     try {
       setIsCalculating(true)
       const companyName = await getCompanyCookie()
-      
+
       if (!companyName) {
         throw new Error('未找到公司信息')
       }
 
       // 确保所有问题都已回答
-      if (!answers || answers.some(a => a.answer === null)) {
+      if (!answers || answers.some((a) => a.answer === null)) {
         throw new Error('请回答所有问题后再提交')
       }
 
       // 保存评估结果
-      const validAnswers = answers.map(a => ({ questionId: a.questionId, answer: a.answer as number }))
+      const validAnswers = answers.map((a) => ({
+        questionId: a.questionId,
+        answer: a.answer as number,
+      }))
       await saveAssessment(companyName, validAnswers)
 
       // 延迟跳转以显示计算动画
@@ -227,21 +238,19 @@ export default function AssessmentPage() {
         {/* sticky 标题和进度条 */}
         <div className="sticky top-0 z-20 w-full bg-white rounded-t-2xl shadow-sm">
           <div className="px-6 sm:px-12 pt-8 pb-4 flex flex-col items-center bg-gradient-to-r from-green-50 via-blue-50 to-purple-50">
-            {/* 模拟评估按钮 - 仅在开发模式显示 */}
-            {process.env.NODE_ENV === 'development' && (
-              <button
-                onClick={simulateAssessment}
-                disabled={isSimulating}
-                className={`absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-medium shadow-sm transition-all
+            {/* 模拟评估按钮 */}
+            <button
+              onClick={simulateAssessment}
+              disabled={isSimulating}
+              className={`absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-medium shadow-sm transition-all
                   ${
                     isSimulating
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
                   }`}
-              >
-                {isSimulating ? '模拟中...' : '模拟评估'}
-              </button>
-            )}
+            >
+              {isSimulating ? '模拟中...' : '模拟评估'}
+            </button>
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
               {dimensions[groupIdx].name}
             </h2>
@@ -259,7 +268,7 @@ export default function AssessmentPage() {
 
         {/* 当前组所有题目 */}
         {dimensions[groupIdx].questions.map((q, qIdx) => {
-          const answer = answers.find(a => a.questionId === q.id)
+          const answer = answers.find((a) => a.questionId === q.id)
           return (
             <Question
               key={qIdx}
@@ -284,7 +293,9 @@ export default function AssessmentPage() {
           totalGroups={dimensions.length}
           isCurrentGroupAnswered={currentGroupAllAnswered}
           onPrevious={() => setGroupIdx((g) => Math.max(0, g - 1))}
-          onNext={() => setGroupIdx((g) => Math.min(dimensions.length - 1, g + 1))}
+          onNext={() =>
+            setGroupIdx((g) => Math.min(dimensions.length - 1, g + 1))
+          }
           onComplete={handleComplete}
         />
       </div>

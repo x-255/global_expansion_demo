@@ -22,7 +22,7 @@ export default function UserForm({ admin, onClose }: Props) {
     const data = {
       username: formData.get('username') as string,
       password: formData.get('password') as string,
-      name: formData.get('name') as string
+      name: formData.get('name') as string,
     }
 
     try {
@@ -110,4 +110,4 @@ export default function UserForm({ admin, onClose }: Props) {
       </div>
     </div>
   )
-} 
+}

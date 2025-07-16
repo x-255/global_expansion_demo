@@ -25,4 +25,4 @@ export interface QuestionFormData {
   text: string
   explanation: string | null
   dimensionId: number
-} 
+}

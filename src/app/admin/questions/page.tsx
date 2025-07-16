@@ -1,7 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { getQuestions, deleteQuestion, type QuestionWithDimension } from './actions'
+import {
+  getQuestions,
+  deleteQuestion,
+  type QuestionWithDimension,
+} from './actions'
 import { getDimensions } from '../dimensions/actions'
 import QuestionForm from './components/QuestionForm'
 import { Dimension } from '../dimensions/types'
@@ -12,7 +16,8 @@ export default function QuestionsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [dimensions, setDimensions] = useState<Dimension[]>([])
   const [showForm, setShowForm] = useState(false)
-  const [editingQuestion, setEditingQuestion] = useState<QuestionWithDimension | null>(null)
+  const [editingQuestion, setEditingQuestion] =
+    useState<QuestionWithDimension | null>(null)
   const [selectedDimensionId, setSelectedDimensionId] = useState<string>('')
 
   const loadQuestions = useCallback(async () => {
@@ -82,14 +87,16 @@ export default function QuestionsPage() {
 
   // 过滤问题列表
   const filteredQuestions = selectedDimensionId
-    ? questions.filter(q => q.dimension?.id === parseInt(selectedDimensionId, 10))
+    ? questions.filter(
+        (q) => q.dimension?.id === parseInt(selectedDimensionId, 10)
+      )
     : questions
 
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">题目管理</h1>
-        <button 
+        <button
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           onClick={() => setShowForm(true)}
         >
@@ -116,22 +123,29 @@ export default function QuestionsPage() {
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
-          {error}
-        </div>
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">{error}</div>
       )}
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 问题文本
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 解释说明
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 所属维度
               </th>
               <th scope="col" className="relative px-6 py-3">
@@ -142,9 +156,15 @@ export default function QuestionsPage() {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredQuestions.map((question) => (
               <tr key={question.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{question.text}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{question.explanation}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{question.dimension?.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {question.text}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {question.explanation}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {question.dimension?.name}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => handleEdit(question)}
@@ -174,4 +194,4 @@ export default function QuestionsPage() {
       )}
     </div>
   )
-} 
+}

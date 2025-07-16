@@ -10,8 +10,8 @@ export async function GET(
     const assessment = await prisma.companyAssessment.findUnique({
       where: { id: parseInt(resolvedParams.id) },
       include: {
-        company: true
-      }
+        company: true,
+      },
     })
 
     if (!assessment) {
@@ -23,4 +23,4 @@ export async function GET(
     console.error('获取评估记录失败:', error)
     return new NextResponse('获取评估记录失败', { status: 500 })
   }
-} 
+}
