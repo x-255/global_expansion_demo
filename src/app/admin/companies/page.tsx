@@ -66,39 +66,52 @@ export default function CompaniesPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">公司列表</h1>
+        <h1 className="text-3xl font-bold text-gray-800">公司列表</h1>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {companies.map((company) => (
           <Link
             key={company.id}
             href={`/admin/companies/${company.id}/assessments`}
             onClick={(e) => handleCompanyClick(e, company.id)}
-            className={`block bg-white rounded-lg p-4 hover:bg-gray-50 transition-all border border-gray-100 relative ${
+            className={`block bg-white rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-gray-200 relative ${
               clickedId === company.id ? 'opacity-70' : ''
             }`}
           >
-            <div className="flex items-center">
-              <div className="flex-1">
-                <h2 className="text-lg font-medium text-gray-900">{company.name}</h2>
-                <div className="mt-1 text-sm text-gray-500 space-x-3">
-                  <span>{company.industry || '未设置行业'}</span>
-                  <span>·</span>
-                  <span>{company.location || '未设置地区'}</span>
+            <div className="flex flex-col space-y-3">
+              <div className="flex justify-between items-start">
+                <h2 className="text-xl font-semibold text-gray-900">{company.name}</h2>
+                <div className="flex items-center bg-blue-50 px-3 py-1 rounded-full">
+                  <span className="font-medium text-blue-600">{company._count.assessments}</span>
+                  <span className="text-blue-500 ml-1">评估</span>
                 </div>
               </div>
-              <div className="flex items-center space-x-1 text-sm">
-                <span className="font-medium text-gray-900">{company._count.assessments}</span>
-                <span className="text-gray-500">次评估</span>
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+              <div className="space-y-2">
+                <div className="flex items-center text-sm text-gray-600">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  {company.industry || '未设置行业'}
+                </div>
+                <div className="flex items-center text-sm text-gray-600">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {company.location || '未设置地区'}
+                </div>
+                <div className="flex items-center text-sm text-gray-600">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  {company.size || '未设置规模'}
+                </div>
               </div>
             </div>
             {clickedId === company.id && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 rounded-lg">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 rounded-xl">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
               </div>
             )}
           </Link>
