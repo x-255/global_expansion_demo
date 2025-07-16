@@ -102,27 +102,41 @@ export function AssessmentDetail({ dimensions, params }: Props) {
       <div className="space-y-8">
         {dimensions.map((dimension) => (
           <div key={dimension.id} className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">{dimension.name}</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">{dimension.name}</h2>
+              {dimension.deleted && (
+                <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
+                  已删除的维度
+                </span>
+              )}
+            </div>
             <p className="text-gray-600 mb-6">{dimension.description}</p>
 
             <div className="space-y-6">
               {dimension.questions.map((question) => {
                 const answer = answers.find(a => a.questionId === question.id)
+                if (!answer) return null // 如果没有回答，不显示这个问题
+                
                 return (
                   <div key={question.id} className="border-t pt-4">
                     <div className="flex items-start">
                       <div className="flex-grow">
-                        <p className="text-gray-800 mb-2">{question.text}</p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <p className="text-gray-800">{question.text}</p>
+                          {question.deleted && (
+                            <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
+                              已删除的问题
+                            </span>
+                          )}
+                        </div>
                         {question.explanation && (
                           <p className="text-sm text-gray-500 mb-2">{question.explanation}</p>
                         )}
-                        {answer && (
-                          <div className="mt-2">
-                            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                              {getAnswerText(answer.answer)}
-                            </span>
-                          </div>
-                        )}
+                        <div className="mt-2">
+                          <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                            {getAnswerText(answer.answer)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>

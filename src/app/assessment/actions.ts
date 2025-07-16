@@ -5,7 +5,12 @@ import { prisma } from '@/lib/prisma'
 export async function getDimensions() {
   const dimensions = await prisma.dimension.findMany({
     where: {
-      deleted: false
+      deleted: false,
+      questions: {
+        some: {
+          deleted: false
+        }
+      }
     },
     include: {
       questions: {

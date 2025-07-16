@@ -52,13 +52,18 @@ export default function AssessmentPage() {
         if (!dimensionsData || dimensionsData.length === 0) {
           throw new Error('未找到评估数据')
         }
-        setDimensions(dimensionsData)
+        // 过滤掉没有题目的维度
+        const filteredDimensions = dimensionsData.filter(d => d.questions.length > 0)
+        if (filteredDimensions.length === 0) {
+          throw new Error('未找到有效的评估数据')
+        }
+        setDimensions(filteredDimensions)
         
         // 等待 store hydration 完成后再处理答案
         if (hydrated) {
           if (!answers || answers.length === 0) {
             // 初始化空的答案数组
-            const initialAnswers = dimensionsData.flatMap(dim => 
+            const initialAnswers = filteredDimensions.flatMap(dim => 
               dim.questions.map(q => ({
                 questionId: q.id,
                 answer: null
