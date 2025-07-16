@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  optimizeFonts: false, // 禁用字体优化
 }
 
 export default nextConfig

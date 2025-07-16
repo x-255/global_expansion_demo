@@ -23,7 +23,7 @@ export async function getDimensionsAverageScores() {
     const dimensions = await getDimensions()
     
     // 获取所有评估记录
-    const assessments = await prisma.assessment.findMany({
+    const assessments = await prisma.companyAssessment.findMany({
       select: {
         answers: true
       }

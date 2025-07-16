@@ -12,17 +12,17 @@ datasource db {
 }
 
 model Company {
-  id          Int         @id @default(autoincrement())
-  name        String      @unique
+  id          Int                @id @default(autoincrement())
+  name        String             @unique
   industry    String?
   size        String?
-  region      String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  assessments Assessment[]
+  location    String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  assessments CompanyAssessment[]
 }
 
-model Assessment {
+model CompanyAssessment {
   id        Int      @id @default(autoincrement())
   companyId Int
   company   Company  @relation(fields: [companyId], references: [id])

@@ -64,7 +64,7 @@ export async function saveAssessment(companyName: string, answers: Array<{ quest
     const validAnswers = answers.filter(item => item.answer !== null)
 
     // 创建评估记录
-    const assessment = await prisma.assessment.create({
+    const assessment = await prisma.companyAssessment.create({
       data: {
         companyId: company.id,
         answers: JSON.stringify(validAnswers)
