@@ -1,4 +1,3 @@
-import { getDimensions } from '@/app/assessment/actions'
 import { AssessmentDetail } from './AssessmentDetail'
 import { prisma } from '@/lib/prisma'
 
@@ -7,6 +6,11 @@ interface Props {
     id: string
     assessmentId: string
   }>
+}
+
+interface Answer {
+  questionId: number
+  answer: number
 }
 
 export default async function AssessmentDetailPage({ params }: Props) {
@@ -25,8 +29,8 @@ export default async function AssessmentDetailPage({ params }: Props) {
   }
 
   // 解析已回答的问题ID
-  const answers = JSON.parse(assessment.answers as string)
-  const answeredQuestionIds = answers.map((a: any) => a.questionId)
+  const answers = JSON.parse(assessment.answers as string) as Answer[]
+  const answeredQuestionIds = answers.map(a => a.questionId)
 
   // 加载所有维度和相关的问题（包括已删除的）
   const dimensions = await prisma.dimension.findMany({

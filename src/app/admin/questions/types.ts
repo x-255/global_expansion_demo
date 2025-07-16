@@ -23,6 +23,6 @@ export type Dimension = {
 
 export interface QuestionFormData {
   text: string
-  explanation?: string
+  explanation: string | null
   dimensionId: number
 } 

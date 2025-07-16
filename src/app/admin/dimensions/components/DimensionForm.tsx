@@ -63,7 +63,7 @@ export default function DimensionForm({ dimension, onClose }: DimensionFormProps
             </label>
             <textarea
               name="description"
-              defaultValue={dimension?.description}
+              defaultValue={dimension?.description ?? ''}
               required
               rows={3}
               className="w-full px-3 py-2 border rounded-md"

@@ -22,13 +22,9 @@ export default function QuestionForm({ question, dimensions, onClose }: Question
     const data: QuestionFormData = {
       text: formData.get('text') as string,
       dimensionId: parseInt(formData.get('dimensionId') as string, 10),
+      explanation: (formData.get('explanation') ?? '') === '' ? null : (formData.get('explanation') as string)
     }
     
-    const explanation = formData.get('explanation') as string
-    if (explanation) {
-      data.explanation = explanation
-    }
-
     try {
       if (question) {
         await updateQuestion(question.id, data)

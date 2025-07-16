@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import { getDimensions, deleteDimension } from './actions'
 import DimensionForm from './components/DimensionForm'
-import { Dimension } from './types'
+import { Dimension, DimensionWithQuestions } from './types'
 
 export default function DimensionsPage() {
-  const [dimensions, setDimensions] = useState<Dimension[]>([])
+  const [dimensions, setDimensions] = useState<DimensionWithQuestions[]>([])
   const [showForm, setShowForm] = useState(false)
-  const [editingDimension, setEditingDimension] = useState<Dimension | null>(null)
+  const [editingDimension, setEditingDimension] = useState<DimensionWithQuestions | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -27,7 +27,7 @@ export default function DimensionsPage() {
     }
   }
 
-  const handleEdit = (dimension: Dimension) => {
+  const handleEdit = (dimension: DimensionWithQuestions) => {
     setEditingDimension(dimension)
     setShowForm(true)
   }
