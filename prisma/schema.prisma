@@ -32,31 +32,35 @@ model CompanyAssessment {
 }
 
 model MaturityLevel {
-  id           Int            @id @default(autoincrement())
-  level        Int // Numerical level (1-5)
-  name         String // e.g. "L1（初始级）"
-  description  String // e.g. "未建立相关能力或完全依赖外部支持"
-  coreFeatures String // e.g. "缺乏战略规划、市场洞察、资源协同等核心能力，国际化实践零散且无体系"
-  minScore     Float // Minimum score for this level
-  maxScore     Float // Maximum score for this level
-  strategies   CoreStrategy[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id                Int                 @id @default(autoincrement())
+  level             Int // Numerical level (1-5)
+  name              String // e.g. "L1（初始级）"
+  description       String // e.g. "未建立相关能力或完全依赖外部支持"
+  coreFeatures      String // e.g. "缺乏战略规划、市场洞察、资源协同等核心能力，国际化实践零散且无体系"
+  minScore          Float // Minimum score for this level
+  maxScore          Float // Maximum score for this level
+  strategies        CoreStrategy[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  DimensionStrategy DimensionStrategy[]
+  StrategyAction    StrategyAction[]
 
   @@unique([level])
 }
 
 model Dimension {
-  id             Int        @id @default(autoincrement())
-  name           String // e.g. "战略规划与执行"
-  description    String? // General description
-  coreCapability String // e.g. "战略制定、目标管理、资源调配"
-  weight         Float      @default(1.0) // Dimension weight
-  order          Int        @default(0) // Display/processing order
-  questions      Question[]
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  deleted        Boolean    @default(false)
+  id                Int                 @id @default(autoincrement())
+  name              String // e.g. "战略规划与执行"
+  description       String? // General description
+  coreCapability    String // e.g. "战略制定、目标管理、资源调配"
+  weight            Float               @default(1.0) // Dimension weight
+  order             Int                 @default(0) // Display/processing order
+  questions         Question[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deleted           Boolean             @default(false)
+  DimensionStrategy DimensionStrategy[]
+  StrategyAction    StrategyAction[]
 }
 
 model Question {
@@ -86,14 +90,58 @@ model QuestionOption {
 }
 
 model CoreStrategy {
-  id        Int           @id @default(autoincrement())
+  id        Int                  @id @default(autoincrement())
   levelId   Int
-  level     MaturityLevel @relation(fields: [levelId], references: [id])
-  name      String // Strategy name
-  actions   String // Key actions (stored as JSON)
-  order     Int           @default(0) // Display/processing order
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  level     MaturityLevel        @relation(fields: [levelId], references: [id])
+  name      String // 策略名称，如"明确战略方向"
+  order     Int // 在同一等级中的顺序
+  actions   CoreStrategyAction[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@unique([levelId, order])
+}
+
+model CoreStrategyAction {
+  id         Int          @id @default(autoincrement())
+  strategyId Int
+  strategy   CoreStrategy @relation(fields: [strategyId], references: [id])
+  content    String // 行动内容
+  order      Int          @default(0)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@unique([strategyId, order])
+}
+
+model DimensionStrategy {
+  id          Int              @id @default(autoincrement())
+  dimensionId Int
+  dimension   Dimension        @relation(fields: [dimensionId], references: [id])
+  levelId     Int
+  level       MaturityLevel    @relation(fields: [levelId], references: [id])
+  definition  String // 存储该维度在该等级的定义
+  actions     StrategyAction[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([dimensionId, levelId])
+}
+
+model StrategyAction {
+  id                  Int               @id @default(autoincrement())
+  dimensionStrategyId Int
+  dimensionStrategy   DimensionStrategy @relation(fields: [dimensionStrategyId], references: [id])
+  dimensionId         Int
+  dimension           Dimension         @relation(fields: [dimensionId], references: [id])
+  levelId             Int
+  level               MaturityLevel     @relation(fields: [levelId], references: [id])
+  content             String // 具体的策略行动点
+  order               Int               @default(0)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@unique([dimensionId, levelId, order])
 }
 
 model Admin {
