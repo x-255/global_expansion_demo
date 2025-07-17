@@ -11,10 +11,15 @@ import { NavigationButtons } from './components/NavigationButtons'
 import type {
   Dimension as PrismaDimension,
   Question as PrismaQuestion,
+  QuestionOption,
 } from '@/generated/prisma/client'
 
+interface Question extends PrismaQuestion {
+  options: QuestionOption[]
+}
+
 interface Dimension extends PrismaDimension {
-  questions: PrismaQuestion[]
+  questions: Question[]
 }
 
 export default function AssessmentPage() {
@@ -22,10 +27,6 @@ export default function AssessmentPage() {
   const [groupIdx, setGroupIdx] = useState(0)
   const [dimensions, setDimensions] = useState<Dimension[]>([])
   const { answers, setAnswers, hydrated } = useAssessmentStore()
-  const [hovered, setHovered] = useState<{
-    qIdx: number
-    optIdx: number
-  } | null>(null)
   const [isSimulating, setIsSimulating] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -232,71 +233,67 @@ export default function AssessmentPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black py-8">
+    <div className="min-h-screen flex flex-col bg-black py-8">
       {isCalculating && <CalculatingAnimation />}
-      <div className="w-full max-w-3xl rounded-2xl shadow-xl p-0 flex flex-col items-center gap-0 bg-gray-2">
+      <div className="w-full max-w-4xl mx-auto">
         {/* sticky 标题和进度条 */}
-        <div className="sticky top-0 z-20 w-full bg-gray-2 rounded-t-2xl shadow-sm">
-          <div className="px-6 sm:px-12 pt-8 pb-4 flex flex-col items-center">
-            {/* 模拟评估按钮 */}
-            <button
-              onClick={simulateAssessment}
-              disabled={isSimulating}
-              className={`absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-medium shadow-sm transition-all
-                  ${
-                    isSimulating
-                      ? 'bg-gray-4 text-gray-dark cursor-not-allowed'
-                      : 'bg-primary text-white hover:bg-gold'
-                  }`}
-            >
-              {isSimulating ? '模拟中...' : '模拟评估'}
-            </button>
-            <h2 className="text-3xl font-bold text-primary mb-2">
-              {dimensions[groupIdx].name}
-            </h2>
-            <p className="text-white mb-4 text-center">
-              {dimensions[groupIdx].description}
-            </p>
-            <ProgressBar
-              progress={progress}
-              currentGroup={groupIdx}
-              totalGroups={dimensions.length}
-            />
-          </div>
+        <div className="sticky top-0 z-20 w-full bg-gray-2 rounded-t-2xl shadow-sm px-8 pt-8 pb-4">
+          {/* 模拟评估按钮 */}
+          <button
+            onClick={simulateAssessment}
+            disabled={isSimulating}
+            className={`absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-medium shadow-sm transition-all
+                ${
+                  isSimulating
+                    ? 'bg-gray-4 text-gray-dark cursor-not-allowed'
+                    : 'bg-primary text-white hover:bg-gold'
+                }`}
+          >
+            {isSimulating ? '模拟中...' : '模拟评估'}
+          </button>
+          <h2 className="text-3xl font-bold text-primary mb-2">
+            {dimensions[groupIdx].name}
+          </h2>
+          <p className="text-white mb-4">{dimensions[groupIdx].description}</p>
+          <ProgressBar
+            progress={progress}
+            currentGroup={groupIdx}
+            totalGroups={dimensions.length}
+          />
         </div>
 
         {/* 当前组所有题目 */}
-        {dimensions[groupIdx].questions.map((q, qIdx) => {
-          const answer = answers.find((a) => a.questionId === q.id)
-          return (
-            <Question
-              key={qIdx}
-              question={q}
-              qIdx={qIdx}
-              isAnswered={answer?.answer !== null}
-              selectedOption={answer?.answer ?? null}
-              hovered={hovered}
-              onSelect={handleSelect}
-              onHover={(qIdx, optIdx) =>
-                setHovered(optIdx !== null ? { qIdx, optIdx } : null)
-              }
-              ref={(el) => {
-                questionRefs.current[qIdx] = el
-              }}
-            />
-          )
-        })}
+        <div className="bg-gray-2 px-10 py-5">
+          {dimensions[groupIdx].questions.map((q, qIdx) => {
+            const answer = answers.find((a) => a.questionId === q.id)
+            return (
+              <Question
+                key={qIdx}
+                question={q}
+                qIdx={qIdx}
+                isAnswered={answer?.answer !== null}
+                selectedOption={answer?.answer ?? null}
+                onSelect={handleSelect}
+                ref={(el) => {
+                  questionRefs.current[qIdx] = el
+                }}
+              />
+            )
+          })}
+        </div>
 
-        <NavigationButtons
-          groupIdx={groupIdx}
-          totalGroups={dimensions.length}
-          isCurrentGroupAnswered={currentGroupAllAnswered}
-          onPrevious={() => setGroupIdx((g) => Math.max(0, g - 1))}
-          onNext={() =>
-            setGroupIdx((g) => Math.min(dimensions.length - 1, g + 1))
-          }
-          onComplete={handleComplete}
-        />
+        <div className="bg-gray-2 rounded-b-2xl shadow-sm">
+          <NavigationButtons
+            groupIdx={groupIdx}
+            totalGroups={dimensions.length}
+            isCurrentGroupAnswered={currentGroupAllAnswered}
+            onPrevious={() => setGroupIdx((g) => Math.max(0, g - 1))}
+            onNext={() =>
+              setGroupIdx((g) => Math.min(dimensions.length - 1, g + 1))
+            }
+            onComplete={handleComplete}
+          />
+        </div>
       </div>
     </div>
   )

@@ -17,10 +17,16 @@ export async function getDimensions() {
         where: {
           deleted: false,
         },
+        include: {
+          options: true,
+        },
+        orderBy: {
+          order: 'asc',
+        },
       },
     },
     orderBy: {
-      id: 'asc',
+      order: 'asc',
     },
   })
   return dimensions
