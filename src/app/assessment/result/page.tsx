@@ -28,13 +28,13 @@ function calculateDimensionScore(
       (a) => a.questionId === question.id
     )?.answer
     if (answer !== null && answer !== undefined) {
-      // 将0-4的选项转换为0-100的分数
-      totalScore += (answer / 4) * 100
+      // 直接使用1-5的分数
+      totalScore += answer + 1
       validAnswers++
     }
   })
 
-  return validAnswers === 0 ? 0 : Math.round(totalScore / validAnswers)
+  return validAnswers === 0 ? 0 : Number((totalScore / validAnswers).toFixed(2))
 }
 
 export default function ResultPage() {
@@ -42,7 +42,13 @@ export default function ResultPage() {
   const { answers, clearAnswers, hydrated } = useAssessmentStore()
   const [dimensions, setDimensions] = useState<Dimension[]>([])
   const [dimensionScores, setDimensionScores] = useState<
-    Array<{ id: number; name: string; score: number; averageScore: number }>
+    Array<{
+      id: number
+      name: string
+      score: number
+      weight: number
+      averageScore: number
+    }>
   >([])
   const [totalScore, setTotalScore] = useState<number>(0)
   const [loading, setLoading] = useState(true)
@@ -85,12 +91,18 @@ export default function ResultPage() {
             id: dim.id,
             name: dim.name,
             score,
+            weight: dim.weight,
             averageScore,
           }
         })
 
-        const total = Math.round(
-          scores.reduce((sum, item) => sum + item.score, 0) / scores.length
+        // 计算加权总分
+        const totalWeight = scores.reduce((sum, item) => sum + item.weight, 0)
+        const total = Number(
+          (
+            scores.reduce((sum, item) => sum + item.score * item.weight, 0) /
+            totalWeight
+          ).toFixed(2)
         )
 
         setDimensionScores(scores)
@@ -135,13 +147,13 @@ export default function ResultPage() {
 
         <div className="text-center mb-12">
           <div className="text-6xl font-bold text-gold mb-2">{totalScore}</div>
-          <div className="text-gray-3">总分（满分100）</div>
+          <div className="text-gray-3">总分（满分5分）</div>
         </div>
         <RadarChart
           scores={dimensionScores.map((d) => d.score)}
           dimensions={dimensions}
         />
-        <AnalysisReport dimensions={dimensionScores} />
+        <AnalysisReport dimensions={dimensionScores} totalScore={totalScore} />
 
         {/* 返回按钮 */}
         <div className="mt-12 text-center">

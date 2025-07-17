@@ -14,11 +14,11 @@ function calculateDimensionScore(
   if (dimensionAnswers.length === 0) return 0
 
   const totalScore = dimensionAnswers.reduce((sum, answer) => {
-    // 将0-4的选项转换为0-100的分数
-    return sum + (answer.answer / 4) * 100
+    // 直接使用1-5的分数
+    return sum + (answer.answer + 1)
   }, 0)
 
-  return Math.round(totalScore / dimensionAnswers.length)
+  return Number((totalScore / dimensionAnswers.length).toFixed(2))
 }
 
 // 获取所有维度的平均分
@@ -54,14 +54,17 @@ export async function getDimensionsAverageScores() {
 
       const averageScore =
         scores.length > 0
-          ? Math.round(
-              scores.reduce((sum, score) => sum + score, 0) / scores.length
+          ? Number(
+              (
+                scores.reduce((sum, score) => sum + score, 0) / scores.length
+              ).toFixed(2)
             )
           : 0
 
       return {
         dimensionId: dimension.id,
         averageScore,
+        weight: dimension.weight,
       }
     })
 
@@ -69,5 +72,73 @@ export async function getDimensionsAverageScores() {
   } catch (error) {
     console.error('计算维度平均分失败:', error)
     throw new Error('计算维度平均分失败')
+  }
+}
+
+// 根据分数获取成熟度等级
+export async function getMaturityLevelByScore(score: number) {
+  try {
+    const level = await prisma.maturityLevel.findFirst({
+      where: {
+        AND: [{ minScore: { lte: score } }, { maxScore: { gte: score } }],
+      },
+      include: {
+        strategies: {
+          include: {
+            actions: {
+              orderBy: {
+                order: 'asc',
+              },
+            },
+          },
+        },
+      },
+    })
+    return level
+  } catch (error) {
+    console.error('获取成熟度等级失败:', error)
+    throw new Error('获取成熟度等级失败')
+  }
+}
+
+// 根据分数和维度ID获取维度策略
+export async function getDimensionStrategyByScore(
+  score: number,
+  dimensionId: number
+) {
+  try {
+    const level = await prisma.maturityLevel.findFirst({
+      where: {
+        AND: [{ minScore: { lte: score } }, { maxScore: { gte: score } }],
+      },
+    })
+
+    if (!level) {
+      return null
+    }
+
+    const dimensionStrategy = await prisma.dimensionStrategy.findUnique({
+      where: {
+        dimensionId_levelId: {
+          dimensionId: dimensionId,
+          levelId: level.id,
+        },
+      },
+      include: {
+        actions: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    })
+
+    return {
+      ...level,
+      dimensionStrategy,
+    }
+  } catch (error) {
+    console.error('获取维度策略失败:', error)
+    throw new Error('获取维度策略失败')
   }
 }

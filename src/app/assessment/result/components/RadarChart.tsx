@@ -56,8 +56,9 @@ export function RadarChart({ scores, dimensions }: RadarChartProps) {
           color: 'rgba(255, 255, 255, 0.2)', // white with opacity
         },
         suggestedMin: 0,
-        suggestedMax: 100,
+        suggestedMax: 5,
         ticks: {
+          stepSize: 1,
           color: '#D1D3D4', // gray-3 color
           backdropColor: 'transparent',
           font: {
