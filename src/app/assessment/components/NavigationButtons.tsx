@@ -20,11 +20,11 @@ export function NavigationButtons({
   const isLastGroup = groupIdx === totalGroups - 1
 
   return (
-    <div className="w-full flex justify-between items-center gap-6 px-6 sm:px-12 py-8 sticky bottom-0 bg-white border-t border-gray-100">
+    <div className="w-full flex justify-between items-center gap-6 px-6 sm:px-12 py-8 sticky bottom-0 bg-gray-2 border-t border-gray-dark">
       {/* 上一组按钮或占位元素 */}
       {showPreviousButton ? (
         <button
-          className="px-8 py-3 bg-gray-200 text-gray-700 rounded-full text-lg font-semibold shadow hover:bg-gray-300 transition-all flex items-center gap-2"
+          className="px-8 py-3 bg-primary text-white rounded-full text-lg font-semibold shadow hover:bg-gold transition-all flex items-center gap-2"
           onClick={onPrevious}
         >
           <svg
@@ -33,7 +33,7 @@ export function NavigationButtons({
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="text-gray-700"
+            className="text-white"
           >
             <path
               d="M19 12H5M5 12L12 19M5 12L12 5"
@@ -53,7 +53,7 @@ export function NavigationButtons({
 
       {showNextButton && (
         <button
-          className="px-8 py-3 bg-green-600 text-white rounded-full text-lg font-semibold shadow-lg hover:bg-green-700 transition-all flex items-center gap-2"
+          className="px-8 py-3 bg-gray-1 text-gold rounded-full text-lg font-semibold shadow-lg hover:bg-gray-2 transition-all flex items-center gap-2"
           onClick={isLastGroup ? onComplete : onNext}
         >
           <span>{isLastGroup ? '完成评估' : '下一组'}</span>
@@ -64,7 +64,7 @@ export function NavigationButtons({
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="text-white"
+              className="text-gold"
             >
               <path
                 d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
@@ -81,7 +81,7 @@ export function NavigationButtons({
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="text-white"
+              className="text-gold"
             >
               <path
                 d="M5 12H19M19 12L12 5M19 12L12 19"

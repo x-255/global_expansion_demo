@@ -131,11 +131,11 @@ export default function AssessmentPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div className="text-red-500 text-lg">{error}</div>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-black">
+        <div className="text-danger text-lg">{error}</div>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-gold transition-colors"
         >
           重新加载
         </button>
@@ -145,8 +145,8 @@ export default function AssessmentPage() {
 
   if (dimensions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">暂无评估数据</div>
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-gray-3">暂无评估数据</div>
       </div>
     )
   }
@@ -232,12 +232,12 @@ export default function AssessmentPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black py-8">
       {isCalculating && <CalculatingAnimation />}
-      <div className="w-full max-w-3xl rounded-2xl shadow-xl p-0 flex flex-col items-center gap-0 bg-white border border-gray-200">
+      <div className="w-full max-w-3xl rounded-2xl shadow-xl p-0 flex flex-col items-center gap-0 bg-gray-2">
         {/* sticky 标题和进度条 */}
-        <div className="sticky top-0 z-20 w-full bg-white rounded-t-2xl shadow-sm">
-          <div className="px-6 sm:px-12 pt-8 pb-4 flex flex-col items-center bg-gradient-to-r from-green-50 via-blue-50 to-purple-50">
+        <div className="sticky top-0 z-20 w-full bg-gray-2 rounded-t-2xl shadow-sm">
+          <div className="px-6 sm:px-12 pt-8 pb-4 flex flex-col items-center">
             {/* 模拟评估按钮 */}
             <button
               onClick={simulateAssessment}
@@ -245,19 +245,18 @@ export default function AssessmentPage() {
               className={`absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-medium shadow-sm transition-all
                   ${
                     isSimulating
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                      ? 'bg-gray-4 text-gray-dark cursor-not-allowed'
+                      : 'bg-primary text-white hover:bg-gold'
                   }`}
             >
               {isSimulating ? '模拟中...' : '模拟评估'}
             </button>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">
+            <h2 className="text-3xl font-bold text-primary mb-2">
               {dimensions[groupIdx].name}
             </h2>
-            <p className="text-gray-600 mb-4 text-center">
+            <p className="text-white mb-4 text-center">
               {dimensions[groupIdx].description}
             </p>
-
             <ProgressBar
               progress={progress}
               currentGroup={groupIdx}

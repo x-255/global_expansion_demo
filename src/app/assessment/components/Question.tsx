@@ -43,10 +43,12 @@ export function Question({
       <div className="flex items-start mb-6">
         <div className="flex-1">
           <div className="text-xl text-gray-800 font-semibold tracking-wide">
-            {question.text}
+            <span className="text-primary font-bold text-lg">
+              {question.text}
+            </span>
           </div>
           {question.explanation && (
-            <div className="mt-2 text-gray-600">{question.explanation}</div>
+            <div className="mt-2 text-gray-3">{question.explanation}</div>
           )}
         </div>
       </div>
