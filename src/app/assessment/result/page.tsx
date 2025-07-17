@@ -127,15 +127,15 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold text-center mb-8">评估结果</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black">
+      <div className="w-full max-w-4xl bg-gray-2 rounded-2xl shadow-xl p-8">
+        <h1 className="text-3xl font-bold text-center mb-8 text-primary">
+          评估结果
+        </h1>
 
         <div className="text-center mb-12">
-          <div className="text-6xl font-bold text-blue-600 mb-2">
-            {totalScore}
-          </div>
-          <div className="text-gray-600">总分（满分100）</div>
+          <div className="text-6xl font-bold text-gold mb-2">{totalScore}</div>
+          <div className="text-gray-3">总分（满分100）</div>
         </div>
         <RadarChart
           scores={dimensionScores.map((d) => d.score)}
@@ -147,7 +147,7 @@ export default function ResultPage() {
         <div className="mt-12 text-center">
           <button
             onClick={handleRestart}
-            className="px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold shadow-lg hover:bg-blue-700 transition-all"
+            className="px-8 py-3 bg-primary text-white rounded-full text-lg font-semibold shadow-lg hover:bg-gold transition-all"
           >
             重新评估
           </button>

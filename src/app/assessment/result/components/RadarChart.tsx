@@ -32,13 +32,15 @@ export function RadarChart({ scores, dimensions }: RadarChartProps) {
       {
         label: '得分',
         data: scores,
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgb(54, 162, 235)',
-        borderWidth: 2,
-        pointBackgroundColor: 'rgb(54, 162, 235)',
-        pointBorderColor: '#fff',
+        backgroundColor: 'rgba(204, 79, 61, 0.3)', // primary color with higher opacity
+        borderColor: '#CC4F3D', // primary color
+        borderWidth: 3,
+        pointBackgroundColor: '#CC4F3D', // primary color
+        pointBorderColor: '#B79F67', // gold color
         pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgb(54, 162, 235)',
+        pointHoverBorderColor: '#B79F67', // gold color
+        pointRadius: 4,
+        pointHoverRadius: 6,
       },
     ],
   }
@@ -48,14 +50,40 @@ export function RadarChart({ scores, dimensions }: RadarChartProps) {
       r: {
         angleLines: {
           display: true,
+          color: 'rgba(255, 255, 255, 0.2)', // white with opacity
+        },
+        grid: {
+          color: 'rgba(255, 255, 255, 0.2)', // white with opacity
         },
         suggestedMin: 0,
         suggestedMax: 100,
+        ticks: {
+          color: '#D1D3D4', // gray-3 color
+          backdropColor: 'transparent',
+          font: {
+            size: 12,
+          },
+        },
+        pointLabels: {
+          color: '#FFFFFF', // white color
+          font: {
+            size: 14,
+            weight: 700,
+          },
+        },
       },
     },
     plugins: {
       legend: {
         display: false,
+      },
+      tooltip: {
+        backgroundColor: 'rgba(34, 34, 34, 0.9)', // gray-1 with opacity
+        titleColor: '#FFFFFF',
+        bodyColor: '#FFFFFF',
+        borderColor: '#B79F67', // gold color
+        borderWidth: 1,
+        padding: 12,
       },
     },
   }
