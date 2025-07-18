@@ -103,9 +103,9 @@ export default function ResultPage() {
           return {
             id: dim.id,
             name: dim.name,
-            score,
+            score: Number(score.toFixed(2)),
             weight: dim.weight,
-            averageScore,
+            averageScore: Number(averageScore.toFixed(2)),
           }
         })
 

@@ -104,7 +104,7 @@ export async function getCompanyAssessments(
             dimensionAnswers.forEach((a) => {
               const q = allQuestions.find((q) => q.id === a.questionId)
               if (q) {
-                const opt = q.options.find((o) => o.id === a.answer) // 通过选项ID查找
+                const opt = q.options.find((o) => o.id === a.answer)
                 if (opt) {
                   total += opt.score
                   count++
@@ -112,7 +112,7 @@ export async function getCompanyAssessments(
               }
             })
             if (count > 0) {
-              score = Math.round(total / count)
+              score = Number((total / count).toFixed(2))
             }
           }
 
@@ -123,10 +123,21 @@ export async function getCompanyAssessments(
           }
         })
 
-        // 计算总分（所有维度的平均分）
-        const totalScore = Math.round(
-          dimensionScores.reduce((sum, d) => sum + d.score, 0) /
-            (dimensionScores.length || 1)
+        // 计算总分（所有维度的加权平均分）
+        const totalWeight = dimensionScores.reduce((sum, d) => {
+          const dimension = dimensions.find((dim) => dim.id === d.dimensionId)
+          return sum + (dimension?.weight || 1)
+        }, 0)
+
+        const totalScore = Number(
+          (
+            dimensionScores.reduce((sum, d) => {
+              const dimension = dimensions.find(
+                (dim) => dim.id === d.dimensionId
+              )
+              return sum + d.score * (dimension?.weight || 1)
+            }, 0) / totalWeight
+          ).toFixed(2)
         )
 
         // 计算成熟度等级

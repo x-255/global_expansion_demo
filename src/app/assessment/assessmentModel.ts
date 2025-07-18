@@ -228,8 +228,8 @@ export const calculateDimensionScore = (
   })
 
   return {
-    score: totalScore,
-    maxScore: totalMaxScore,
+    score: Number(totalScore.toFixed(2)),
+    maxScore: Number(totalMaxScore.toFixed(2)),
   }
 }
 
@@ -243,15 +243,19 @@ export const calculateTotalScore = (dimensionScores: {
   dimensions.forEach((dimension) => {
     const dimensionScore = dimensionScores[dimension.id]
     if (dimensionScore) {
-      totalScore +=
-        (dimensionScore.score / dimensionScore.maxScore) * dimension.weight // 直接使用0-100的权重
+      totalScore += Number(
+        (
+          (dimensionScore.score / dimensionScore.maxScore) *
+          dimension.weight
+        ).toFixed(2)
+      ) // 直接使用0-100的权重
       totalMaxScore += dimension.weight
     }
   })
 
   return {
-    score: totalScore,
-    maxScore: totalMaxScore,
+    score: Number(totalScore.toFixed(2)),
+    maxScore: Number(totalMaxScore.toFixed(2)),
   }
 }
 

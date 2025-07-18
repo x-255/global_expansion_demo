@@ -120,7 +120,7 @@ export function AssessmentDetail({
                   )
                   if (!answer) return null
                   const option = question.options.find(
-                    (o: any) => o.score === answer.answer
+                    (o: any) => o.id === answer.answer
                   )
                   return (
                     <div key={question.id} className="border-t pt-4">
