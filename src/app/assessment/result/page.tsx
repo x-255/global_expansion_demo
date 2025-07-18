@@ -6,12 +6,17 @@ import { getDimensions } from '../actions'
 import { getDimensionsAverageScores } from './actions'
 import { RadarChart } from './components/RadarChart'
 import { AnalysisReport } from './components/AnalysisReport'
-import type { Dimension, Question } from '@/generated/prisma/client'
+import type {
+  Dimension,
+  Question,
+  QuestionOption,
+} from '@/generated/prisma/client'
 
 // 计算单个维度的得分
 function calculateDimensionScore(
   questions: Question[],
-  dimensionAnswers: Array<{ questionId: number; answer: number | null }>
+  dimensionAnswers: Array<{ questionId: number; answer: number | null }>,
+  allOptions: QuestionOption[]
 ) {
   if (
     questions.length === 0 ||
@@ -28,9 +33,11 @@ function calculateDimensionScore(
       (a) => a.questionId === question.id
     )?.answer
     if (answer !== null && answer !== undefined) {
-      // 直接使用1-5的分数
-      totalScore += answer + 1
-      validAnswers++
+      const option = allOptions.find((opt) => opt.id === answer)
+      if (option) {
+        totalScore += option.score
+        validAnswers++
+      }
     }
   })
 
@@ -74,13 +81,19 @@ export default function ResultPage() {
 
         setDimensions(dimensionsData)
 
+        // 获取所有选项数据用于计算分数
+        const allOptions = dimensionsData.flatMap((d) =>
+          d.questions.flatMap((q) => q.options)
+        )
+
         // 计算每个维度的得分并合并平均分
         const scores = dimensionsData.map((dim) => {
           const score = calculateDimensionScore(
             dim.questions,
             answers.filter((a) =>
               dim.questions.some((q) => q.id === a.questionId)
-            )
+            ),
+            allOptions
           )
 
           const averageScore =
@@ -96,7 +109,6 @@ export default function ResultPage() {
           }
         })
 
-        // 计算加权总分
         const totalWeight = scores.reduce((sum, item) => sum + item.weight, 0)
         const total = Number(
           (
@@ -108,14 +120,15 @@ export default function ResultPage() {
         setDimensionScores(scores)
         setTotalScore(total)
         setLoading(false)
-      } catch {
+      } catch (error) {
+        console.error('加载评估结果失败:', error)
         setErrorMessage('加载评估结果失败，请稍后重试')
         setLoading(false)
       }
     }
 
     loadData()
-  }, [answers, router, hydrated]) // 添加 hydrated 到依赖数组
+  }, [answers, router, hydrated])
 
   const handleRestart = () => {
     clearAnswers()

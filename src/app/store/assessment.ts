@@ -3,7 +3,7 @@ import { devtools, persist, createJSONStorage } from 'zustand/middleware'
 
 interface Answer {
   questionId: number
-  answer: number | null
+  answer: number | null // optionId, null means not answered
 }
 
 // 定义store的类型

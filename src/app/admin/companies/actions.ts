@@ -50,14 +50,23 @@ export async function getCompanyAssessments(
       orderBy: { createdAt: 'desc' },
     })
 
-    // 获取维度和题目数据
+    // 获取所有题目和选项
+    const allQuestions = await prisma.question.findMany({
+      include: { options: true },
+    })
+    // 获取所有维度
     const dimensions = await prisma.dimension.findMany({
-      where: { deleted: false },
       include: {
         questions: {
-          where: { deleted: false },
+          include: {
+            options: true,
+          },
         },
       },
+    })
+    // 获取所有成熟度等级
+    const maturityLevels = await prisma.maturityLevel.findMany({
+      orderBy: { level: 'asc' },
     })
 
     // 计算每个评估的分数
@@ -65,22 +74,18 @@ export async function getCompanyAssessments(
       (assessment) => {
         // 处理answers字段，确保它是正确的格式
         let answers: Array<{ questionId: number; answer: number }> = []
-
         if (assessment.answers) {
           try {
-            // 如果answers已经是对象，直接使用
             if (typeof assessment.answers === 'object') {
               answers = assessment.answers as Array<{
                 questionId: number
                 answer: number
               }>
             } else {
-              // 如果是字符串，尝试解析
               answers = JSON.parse(assessment.answers.toString())
             }
           } catch (error) {
             console.error('解析answers失败:', error)
-            // 解析失败时使用空数组
             answers = []
           }
         }
@@ -94,13 +99,21 @@ export async function getCompanyAssessments(
 
           let score = 0
           if (dimensionAnswers.length > 0) {
-            // 将0-4的选项转换为0-100的分数
-            score = Math.round(
-              (dimensionAnswers.reduce((sum, a) => sum + a.answer, 0) /
-                dimensionAnswers.length /
-                4) *
-                100
-            )
+            let total = 0
+            let count = 0
+            dimensionAnswers.forEach((a) => {
+              const q = allQuestions.find((q) => q.id === a.questionId)
+              if (q) {
+                const opt = q.options.find((o) => o.id === a.answer) // 通过选项ID查找
+                if (opt) {
+                  total += opt.score
+                  count++
+                }
+              }
+            })
+            if (count > 0) {
+              score = Math.round(total / count)
+            }
           }
 
           return {
@@ -113,18 +126,31 @@ export async function getCompanyAssessments(
         // 计算总分（所有维度的平均分）
         const totalScore = Math.round(
           dimensionScores.reduce((sum, d) => sum + d.score, 0) /
-            dimensionScores.length
+            (dimensionScores.length || 1)
+        )
+
+        // 计算成熟度等级
+        const maturityLevel = maturityLevels.find(
+          (level) =>
+            totalScore >= level.minScore && totalScore <= level.maxScore
         )
 
         return {
           id: assessment.id,
           companyId: assessment.companyId,
-          answers,
+          company: assessment.company,
+          answers, // 使用解析后的 answers 而不是原始的 assessment.answers
           createdAt: assessment.createdAt,
           updatedAt: assessment.updatedAt,
-          company: assessment.company,
-          totalScore,
           dimensionScores,
+          totalScore,
+          maturityLevel: maturityLevel
+            ? {
+                id: maturityLevel.id,
+                name: maturityLevel.name,
+                level: maturityLevel.level,
+              }
+            : null,
         }
       }
     )
@@ -132,6 +158,6 @@ export async function getCompanyAssessments(
     return assessmentsWithScores
   } catch (error) {
     console.error('获取评估记录失败:', error)
-    throw new Error('获取评估记录失败')
+    throw error
   }
 }

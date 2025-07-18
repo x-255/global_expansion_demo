@@ -166,9 +166,11 @@ export default function AssessmentPage() {
   const progress = Math.round((answeredCount / totalQuestions) * 100)
 
   const handleSelect = (qIdx: number, optIdx: number) => {
-    const questionId = dimensions[groupIdx].questions[qIdx].id
+    const question = dimensions[groupIdx].questions[qIdx]
+    const option = question.options[optIdx]
+    const questionId = question.id
     const newAnswers = answers.map((a) =>
-      a.questionId === questionId ? { ...a, answer: optIdx } : a
+      a.questionId === questionId ? { ...a, answer: option.id } : a
     )
     setAnswers(newAnswers)
 
@@ -191,14 +193,13 @@ export default function AssessmentPage() {
     const newAnswers = dimensions.flatMap((dim) =>
       dim.questions.map((q) => ({
         questionId: q.id,
-        answer: Math.floor(Math.random() * 5),
+        answer: q.options[Math.floor(Math.random() * q.options.length)].id, // 使用随机选项的ID
       }))
     )
     setAnswers(newAnswers)
 
     // 跳转到最后一组
     setGroupIdx(dimensions.length - 1)
-    setIsSimulating(false)
   }
 
   const handleComplete = async () => {

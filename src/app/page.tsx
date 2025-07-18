@@ -202,9 +202,7 @@ export default function Home() {
                     className="w-full px-6 py-4 text-lg border border-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-shadow bg-gray-2 text-white"
                     required
                   />
-                  {error && (
-                    <p className="mt-2 text-sm text-danger">{error}</p>
-                  )}
+                  {error && <p className="mt-2 text-sm text-danger">{error}</p>}
                 </div>
 
                 <button
@@ -220,10 +218,10 @@ export default function Home() {
                 <p className="text-white mb-6">完成评估后，您将获得：</p>
                 <div className="grid grid-cols-2 gap-6 text-left">
                   {[
+                    '出海能力成熟度评估模型',
                     '详细的能力评估报告',
-                    '专业团队的改进建议',
-                    '个性化发展方案',
                     '行业对标分析',
+                    'AI增强的智能化一站式企业出海解决方案',
                   ].map((item, index) => (
                     <div
                       key={index}

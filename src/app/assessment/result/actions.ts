@@ -2,23 +2,30 @@
 
 import { prisma } from '@/lib/prisma'
 import { getDimensions } from '../actions'
+import type { QuestionOption } from '@/generated/prisma/client'
 
 // 计算单个维度的得分
 function calculateDimensionScore(
   answers: Array<{ questionId: number; answer: number }>,
-  dimensionQuestionIds: number[]
+  dimensionQuestionIds: number[],
+  allOptions: QuestionOption[]
 ) {
   const dimensionAnswers = answers.filter((a) =>
     dimensionQuestionIds.includes(a.questionId)
   )
   if (dimensionAnswers.length === 0) return 0
 
-  const totalScore = dimensionAnswers.reduce((sum, answer) => {
-    // 直接使用1-5的分数
-    return sum + (answer.answer + 1)
-  }, 0)
+  let total = 0
+  let count = 0
+  dimensionAnswers.forEach((answer) => {
+    const option = allOptions.find((opt) => opt.id === answer.answer)
+    if (option) {
+      total += option.score
+      count++
+    }
+  })
 
-  return Number((totalScore / dimensionAnswers.length).toFixed(2))
+  return count === 0 ? 0 : Number((total / count).toFixed(2))
 }
 
 // 获取所有维度的平均分
@@ -34,6 +41,9 @@ export async function getDimensionsAverageScores() {
       },
     })
 
+    // 获取所有选项
+    const allOptions = await prisma.questionOption.findMany()
+
     // 计算每个维度的平均分
     const dimensionAverages = dimensions.map((dimension) => {
       const dimensionQuestionIds = dimension.questions.map((q) => q.id)
@@ -48,7 +58,11 @@ export async function getDimensionsAverageScores() {
             console.error('解析答案失败:', error)
             return 0
           }
-          return calculateDimensionScore(parsedAnswers, dimensionQuestionIds)
+          return calculateDimensionScore(
+            parsedAnswers,
+            dimensionQuestionIds,
+            allOptions
+          )
         })
         .filter((score) => score > 0) // 过滤掉0分（未答题）的情况
 
@@ -70,8 +84,8 @@ export async function getDimensionsAverageScores() {
 
     return dimensionAverages
   } catch (error) {
-    console.error('计算维度平均分失败:', error)
-    throw new Error('计算维度平均分失败')
+    console.error('获取维度平均分失败:', error)
+    throw error
   }
 }
 

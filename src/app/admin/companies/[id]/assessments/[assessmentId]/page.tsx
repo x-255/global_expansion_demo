@@ -41,6 +41,9 @@ export default async function AssessmentDetailPage({ params }: Props) {
             in: answeredQuestionIds,
           },
         },
+        include: {
+          options: true,
+        },
       },
     },
     orderBy: {
@@ -51,7 +54,62 @@ export default async function AssessmentDetailPage({ params }: Props) {
   // 过滤掉没有任何已回答问题的维度
   const filteredDimensions = dimensions.filter((d) => d.questions.length > 0)
 
+  // 计算各维度得分、总分、成熟度等级
+  const dimensionScores = filteredDimensions.map((dimension) => {
+    const dimensionAnswers = answers.filter((a) =>
+      dimension.questions.some((q) => q.id === a.questionId)
+    )
+    let score = 0
+    if (dimensionAnswers.length > 0) {
+      let total = 0
+      let count = 0
+      dimensionAnswers.forEach((a) => {
+        const q = dimension.questions.find((q) => q.id === a.questionId)
+        if (q) {
+          const opt = q.options.find((o) => o.score === a.answer)
+          if (opt) {
+            total += opt.score
+            count++
+          }
+        }
+      })
+      if (count > 0) {
+        score = Math.round(total / count)
+      }
+    }
+    return {
+      dimensionId: dimension.id,
+      dimensionName: dimension.name,
+      score,
+    }
+  })
+  const totalScore = Math.round(
+    dimensionScores.reduce((sum, d) => sum + d.score, 0) /
+      (dimensionScores.length || 1)
+  )
+  const maturityLevels = await prisma.maturityLevel.findMany({
+    orderBy: { level: 'asc' },
+  })
+  const maturityLevel = maturityLevels.find(
+    (level) => totalScore >= level.minScore && totalScore <= level.maxScore
+  )
+
   return (
-    <AssessmentDetail dimensions={filteredDimensions} params={resolvedParams} />
+    <AssessmentDetail
+      dimensions={filteredDimensions}
+      params={resolvedParams}
+      answers={answers}
+      dimensionScores={dimensionScores}
+      totalScore={totalScore}
+      maturityLevel={
+        maturityLevel
+          ? {
+              id: maturityLevel.id,
+              name: maturityLevel.name,
+              level: maturityLevel.level,
+            }
+          : null
+      }
+    />
   )
 }

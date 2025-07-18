@@ -9,7 +9,7 @@ interface QuestionProps {
   }
   qIdx: number
   isAnswered: boolean
-  selectedOption: number | null
+  selectedOption: number | null // 现在这是选项ID而不是索引
   onSelect: (qIdx: number, optIdx: number) => void
   ref?: React.RefCallback<HTMLDivElement>
 }
@@ -50,19 +50,19 @@ export function Question({
               <div
                 className={`relative flex-shrink-0 w-6 h-6 border-2 rounded-full transition-colors mr-4
                 ${
-                  selectedOption === optIdx
+                  selectedOption === option.id
                     ? 'border-primary'
                     : 'border-gray-500 group-hover:border-gray-300'
                 }`}
               >
-                {selectedOption === optIdx && (
+                {selectedOption === option.id && (
                   <div className="absolute inset-1 bg-primary rounded-full" />
                 )}
               </div>
               <span
                 className={`text-lg transition-colors
                 ${
-                  selectedOption === optIdx
+                  selectedOption === option.id
                     ? 'text-primary font-medium'
                     : 'text-gray-300 group-hover:text-gray-200'
                 }`}

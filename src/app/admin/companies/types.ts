@@ -15,7 +15,7 @@ export interface CompanyAssessment {
   company: Omit<Company, 'assessments'>
   answers: Array<{
     questionId: number
-    answer: number
+    answer: number // optionId of the selected answer
   }>
   createdAt: Date
   updatedAt: Date
@@ -30,4 +30,9 @@ export interface AssessmentWithScore
     dimensionName: string
     score: number
   }>
+  maturityLevel: {
+    id: number
+    name: string
+    level: number
+  } | null
 }

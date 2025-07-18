@@ -72,6 +72,11 @@ export function AssessmentsList({ params }: Props) {
                 <p className="text-gray-600">
                   评估时间：{new Date(assessment.createdAt).toLocaleString()}
                 </p>
+                {assessment.maturityLevel && (
+                  <div className="mt-1 text-sm text-green-700 font-bold">
+                    成熟度等级：{assessment.maturityLevel.name}
+                  </div>
+                )}
               </div>
               <div className="text-2xl font-bold text-blue-600">
                 {assessment.totalScore}
