@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createDimension, updateDimension } from '../actions'
 import { Dimension, DimensionFormData } from '../types'
 import { getMaturityLevels } from '../../maturity-levels/actions'
@@ -23,6 +23,11 @@ export default function DimensionForm({
   const [strategies, setStrategies] = useState<{
     [levelId: number]: { content: string }[]
   }>({})
+  // 新增：用于聚焦每个等级下每个策略输入框
+  const strategyRefs = useRef<{
+    [levelId: number]: Array<HTMLInputElement | null>
+  }>({})
+  const [focusStrategy, setFocusStrategy] = useState<number | null>(null)
 
   useEffect(() => {
     getMaturityLevels().then((levels) => {
@@ -52,6 +57,17 @@ export default function DimensionForm({
     })
   }, [dimension])
 
+  useEffect(() => {
+    if (focusStrategy && strategyRefs.current[focusStrategy]) {
+      const arr = strategyRefs.current[focusStrategy]
+      if (arr && arr.length > 0) {
+        const last = arr[arr.length - 1]
+        if (last) last.focus()
+      }
+      setFocusStrategy(null)
+    }
+  }, [strategies, focusStrategy])
+
   const handleDescChange = (levelId: number, value: string) => {
     setMaturityLevelDescriptions((prev) => ({
       ...prev,
@@ -79,6 +95,7 @@ export default function DimensionForm({
       arr.push({ content: '' })
       return { ...prev, [levelId]: arr }
     })
+    setFocusStrategy(levelId)
   }
   const handleRemoveStrategy = (levelId: number, idx: number) => {
     setStrategies((prev) => {
@@ -239,6 +256,11 @@ export default function DimensionForm({
                           }
                           className="flex-1 px-3 py-2 border rounded-md"
                           placeholder="请输入策略或方案"
+                          ref={(el) => {
+                            if (!strategyRefs.current[level.id])
+                              strategyRefs.current[level.id] = []
+                            strategyRefs.current[level.id][idx] = el
+                          }}
                         />
                         <button
                           type="button"

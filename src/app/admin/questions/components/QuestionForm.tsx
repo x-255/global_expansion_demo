@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   createQuestion,
   updateQuestion,
-  type QuestionWithDimension,
+  type QuestionWithOptions,
 } from '../actions'
 import type { QuestionFormData } from '../types'
 import { Dimension } from '../../dimensions/types'
 
 interface QuestionFormProps {
-  question?: QuestionWithDimension
+  question?: QuestionWithOptions
   dimensions: Dimension[]
   onClose: () => void
 }
@@ -20,6 +20,55 @@ export default function QuestionForm({
 }: QuestionFormProps) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [options, setOptions] = useState<
+    { description: string; score: number }[]
+  >(
+    question?.options?.length
+      ? question.options.map((opt) => ({
+          description: opt.description,
+          score: opt.score,
+        }))
+      : [{ description: '', score: 1 }]
+  )
+  const [weight, setWeight] = useState<number>(question?.weight ?? 1)
+  const [order, setOrder] = useState<number>(question?.order ?? 0)
+  // 新增：用于聚焦每个描述输入框
+  const optionRefs = useRef<Array<HTMLInputElement | null>>([])
+  const [focusLast, setFocusLast] = useState(false)
+
+  useEffect(() => {
+    if (focusLast && optionRefs.current.length > 0) {
+      const last = optionRefs.current[optionRefs.current.length - 1]
+      if (last) last.focus()
+      setFocusLast(false)
+    }
+  }, [options, focusLast])
+
+  const handleOptionChange = (
+    idx: number,
+    field: 'description' | 'score',
+    value: string
+  ) => {
+    setOptions((prev) => {
+      const arr = [...prev]
+      if (field === 'score') {
+        arr[idx][field] = Number(value)
+      } else {
+        arr[idx][field] = value
+      }
+      return arr
+    })
+  }
+  const handleAddOption = () => {
+    setOptions((prev) => {
+      const lastScore = prev.length > 0 ? prev[prev.length - 1].score : 0
+      return [...prev, { description: '', score: lastScore + 1 }]
+    })
+    setFocusLast(true)
+  }
+  const handleRemoveOption = (idx: number) => {
+    setOptions((prev) => prev.filter((_, i) => i !== idx))
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -30,10 +79,9 @@ export default function QuestionForm({
     const data: QuestionFormData = {
       text: formData.get('text') as string,
       dimensionId: parseInt(formData.get('dimensionId') as string, 10),
-      explanation:
-        (formData.get('explanation') ?? '') === ''
-          ? null
-          : (formData.get('explanation') as string),
+      weight,
+      order,
+      options: options.filter((opt) => opt.description.trim() !== ''),
     }
 
     try {
@@ -51,8 +99,8 @@ export default function QuestionForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">
           {question ? '编辑题目' : '添加题目'}
         </h2>
@@ -90,16 +138,97 @@ export default function QuestionForm({
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              解释说明（可选）
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                权重 *
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={weight}
+                onChange={(e) => setWeight(Number(e.target.value))}
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                排序 *
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={order}
+                onChange={(e) => setOrder(Number(e.target.value))}
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              />
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              问题选项
             </label>
-            <textarea
-              name="explanation"
-              defaultValue={question?.explanation ?? undefined}
-              rows={3}
-              className="w-full px-3 py-2 border rounded-md"
-            />
+            <div className="space-y-2">
+              {options.map((opt, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={opt.description}
+                    onChange={(e) =>
+                      handleOptionChange(idx, 'description', e.target.value)
+                    }
+                    placeholder="选项描述"
+                    className="flex-1 px-3 py-2 border rounded-md"
+                    required
+                    ref={(el) => {
+                      optionRefs.current[idx] = el
+                    }}
+                  />
+                  <input
+                    type="number"
+                    value={opt.score}
+                    onChange={(e) =>
+                      handleOptionChange(idx, 'score', e.target.value)
+                    }
+                    placeholder="分数"
+                    className="w-24 px-3 py-2 border rounded-md"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => handleRemoveOption(idx)}
+                    title="删除"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="mt-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                onClick={handleAddOption}
+              >
+                + 增加选项
+              </button>
+            </div>
           </div>
 
           {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}

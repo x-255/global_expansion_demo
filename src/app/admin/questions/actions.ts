@@ -2,19 +2,19 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import type { Question, Dimension } from '@/generated/prisma/client'
+import type {
+  Question,
+  Dimension,
+  QuestionOption,
+} from '@/generated/prisma/client'
+import type { QuestionFormData } from './types'
 
-export interface QuestionFormData {
-  text: string
-  explanation: string | null
-  dimensionId: number
-}
-
-export type QuestionWithDimension = Question & {
+export type QuestionWithOptions = Question & {
   dimension: Dimension
+  options: QuestionOption[]
 }
 
-export async function getQuestions(): Promise<QuestionWithDimension[]> {
+export async function getQuestions(): Promise<QuestionWithOptions[]> {
   try {
     const questions = await prisma.question.findMany({
       where: {
@@ -25,9 +25,10 @@ export async function getQuestions(): Promise<QuestionWithDimension[]> {
       },
       include: {
         dimension: true,
+        options: true,
       },
       orderBy: {
-        id: 'asc',
+        order: 'asc',
       },
     })
     return questions
@@ -39,7 +40,7 @@ export async function getQuestions(): Promise<QuestionWithDimension[]> {
 
 export async function createQuestion(
   data: QuestionFormData
-): Promise<Question> {
+): Promise<QuestionWithOptions> {
   // 检查维度是否存在且未被删除
   const dimension = await prisma.dimension.findUnique({
     where: {
@@ -47,38 +48,51 @@ export async function createQuestion(
       deleted: false,
     },
   })
-
   if (!dimension) {
     throw new Error('所选维度不存在或已被删除')
   }
-
+  // 创建问题
   const question = await prisma.question.create({
     data: {
       text: data.text,
-      explanation: data.explanation,
       dimensionId: data.dimensionId,
+      weight: data.weight,
+      order: data.order,
       deleted: false,
     },
   })
+  // 创建选项
+  if (data.options && data.options.length > 0) {
+    await prisma.questionOption.createMany({
+      data: data.options.map((opt) => ({
+        questionId: question.id,
+        description: opt.description,
+        score: opt.score,
+      })),
+    })
+  }
   revalidatePath('/admin/questions')
-  return question
+  // 返回带options的完整问题
+  return prisma.question.findUnique({
+    where: { id: question.id },
+    include: { dimension: true, options: true },
+  }) as Promise<QuestionWithOptions>
 }
 
 export async function updateQuestion(
   id: number,
   data: QuestionFormData
-): Promise<Question> {
+): Promise<QuestionWithOptions> {
   const question = await prisma.question.findUnique({
     where: {
       id,
       deleted: false,
     },
+    include: { options: true },
   })
-
   if (!question) {
     throw new Error('问题不存在')
   }
-
   // 检查新选择的维度是否存在且未被删除
   const dimension = await prisma.dimension.findUnique({
     where: {
@@ -86,22 +100,36 @@ export async function updateQuestion(
       deleted: false,
     },
   })
-
   if (!dimension) {
     throw new Error('所选维度不存在或已被删除')
   }
-
-  const updated = await prisma.question.update({
+  // 更新问题本身
+  await prisma.question.update({
     where: { id },
     data: {
       text: data.text,
-      explanation: data.explanation,
       dimensionId: data.dimensionId,
+      weight: data.weight,
+      order: data.order,
     },
   })
-
+  // 先删除原有选项，再插入新选项
+  await prisma.questionOption.deleteMany({ where: { questionId: id } })
+  if (data.options && data.options.length > 0) {
+    await prisma.questionOption.createMany({
+      data: data.options.map((opt) => ({
+        questionId: id,
+        description: opt.description,
+        score: opt.score,
+      })),
+    })
+  }
   revalidatePath('/admin/questions')
-  return updated
+  // 返回带options的完整问题
+  return prisma.question.findUnique({
+    where: { id },
+    include: { dimension: true, options: true },
+  }) as Promise<QuestionWithOptions>
 }
 
 export async function deleteQuestion(id: number): Promise<void> {
@@ -111,15 +139,12 @@ export async function deleteQuestion(id: number): Promise<void> {
       deleted: false,
     },
   })
-
   if (!question) {
     throw new Error('问题不存在')
   }
-
   await prisma.question.update({
     where: { id },
     data: { deleted: true },
   })
-
   revalidatePath('/admin/questions')
 }

@@ -1,16 +1,27 @@
 export interface Question {
   id: number
   text: string
-  explanation: string | null
   dimensionId: number
   dimension: {
     id: number
     name: string
     deleted: boolean
   }
+  weight: number
+  order: number
   createdAt: Date
   updatedAt: Date
   deleted: boolean
+  options: QuestionOption[]
+}
+
+export type QuestionOption = {
+  id: number
+  questionId: number
+  description: string
+  score: number
+  createdAt: Date
+  updatedAt: Date
 }
 
 export type Dimension = {
@@ -23,6 +34,13 @@ export type Dimension = {
 
 export interface QuestionFormData {
   text: string
-  explanation: string | null
   dimensionId: number
+  weight: number
+  order: number
+  options: Array<{
+    description: string
+    score: number
+  }>
 }
+
+export type QuestionWithOptions = Question
