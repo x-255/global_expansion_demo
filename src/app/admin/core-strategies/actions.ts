@@ -84,7 +84,7 @@ export async function updateCoreStrategy(
     const { actions, ...strategyData } = data
 
     // 更新策略基本信息
-    const strategy = await prisma.coreStrategy.update({
+    await prisma.coreStrategy.update({
       where: { id },
       data: {
         name: strategyData.name,

@@ -1,10 +1,35 @@
 import { useState, useEffect, useRef } from 'react'
 import { createDimension, updateDimension } from '../actions'
-import { Dimension, DimensionFormData } from '../types'
+import { DimensionFormData } from '../types'
 import { getMaturityLevels } from '../../maturity-levels/actions'
 
 interface DimensionFormProps {
-  dimension?: any // 允许带有 DimensionStrategy
+  dimension?: {
+    id: number
+    name: string
+    description: string | null
+    weight: number
+    order?: number
+    coreCapability?: string
+    DimensionStrategy?: Array<{
+      id: number
+      levelId: number
+      definition: string
+      level?: {
+        name: string
+        minScore: number
+        maxScore: number
+      }
+      actions?: Array<{
+        content: string
+      }>
+    }>
+    strategies?: Array<{
+      id: number
+      content: string
+      levelId: number
+    }>
+  }
   onClose: () => void
 }
 
@@ -14,7 +39,13 @@ export default function DimensionForm({
 }: DimensionFormProps) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [maturityLevels, setMaturityLevels] = useState<any[]>([])
+  const [maturityLevels, setMaturityLevels] = useState<Array<{
+    id: number
+    name: string
+    level: number
+    minScore: number
+    maxScore: number
+  }>>([])
   // 典型特征
   const [maturityLevelDescriptions, setMaturityLevelDescriptions] = useState<{
     [levelId: number]: { definition: string }
@@ -34,20 +65,20 @@ export default function DimensionForm({
       setMaturityLevels(levels)
       // 初始化描述
       if (dimension && dimension.DimensionStrategy) {
-        const descMap: any = {}
-        const stratMap: any = {}
-        dimension.DimensionStrategy.forEach((ds: any) => {
+        const descMap: Record<number, { definition: string }> = {}
+        const stratMap: Record<number, Array<{ content: string }>> = {}
+        dimension.DimensionStrategy.forEach((ds) => {
           descMap[ds.levelId] = { definition: ds.definition }
-          stratMap[ds.levelId] = (ds.actions || []).map((action: any) => ({
+          stratMap[ds.levelId] = (ds.actions || []).map((action) => ({
             content: action.content,
           }))
         })
         setMaturityLevelDescriptions(descMap)
         setStrategies(stratMap)
       } else {
-        const descMap: any = {}
-        const stratMap: any = {}
-        levels.forEach((level: any) => {
+        const descMap: Record<number, { definition: string }> = {}
+        const stratMap: Record<number, Array<{ content: string }>> = {}
+        levels.forEach((level) => {
           descMap[level.id] = { definition: '' }
           stratMap[level.id] = []
         })

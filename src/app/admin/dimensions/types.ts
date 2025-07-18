@@ -17,4 +17,17 @@ export interface DimensionFormData {
 
 export interface DimensionWithQuestions extends Dimension {
   questions: Question[]
+  DimensionStrategy?: Array<{
+    id: number
+    levelId: number
+    definition: string
+    level?: {
+      name: string
+      minScore: number
+      maxScore: number
+    }
+    actions?: Array<{
+      content: string
+    }>
+  }>
 }

@@ -221,7 +221,7 @@ export default function Home() {
                     '出海能力成熟度评估模型',
                     '详细的能力评估报告',
                     '行业对标分析',
-                    'AI增强的智能化一站式企业出海解决方案',
+                    '一站式企业出海解决方案',
                   ].map((item, index) => (
                     <div
                       key={index}

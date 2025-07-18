@@ -2,13 +2,27 @@
 
 import { useEffect, useState } from 'react'
 import type {
-  Dimension,
-  Question,
   CompanyAssessment,
 } from '@/generated/prisma/client'
 
 interface Props {
-  dimensions: any[]
+  dimensions: Array<{
+    id: number
+    name: string
+    description: string
+    deleted?: boolean
+    questions: Array<{
+      id: number
+      text: string
+      deleted?: boolean
+      options: Array<{
+        id: number
+        text: string
+        score: number
+        description?: string
+      }>
+    }>
+  }>
   params: {
     id: string
     assessmentId: string
@@ -114,13 +128,13 @@ export function AssessmentDetail({
               <p className="text-gray-600 mb-6">{dimension.description}</p>
 
               <div className="space-y-6">
-                {dimension.questions.map((question: any) => {
+                {dimension.questions.map((question) => {
                   const answer = answers.find(
                     (a) => a.questionId === question.id
                   )
                   if (!answer) return null
                   const option = question.options.find(
-                    (o: any) => o.id === answer.answer
+                    (o) => o.id === answer.answer
                   )
                   return (
                     <div key={question.id} className="border-t pt-4">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { MaturityLevel } from '@/generated/prisma/client'
 import type { CoreStrategyWithDetails, CoreStrategyFormData } from '../types'
 import {
@@ -26,6 +26,19 @@ export function CoreStrategyForm({ strategy, onClose, onSubmit }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const loadLevels = useCallback(async () => {
+    try {
+      const data = await getMaturityLevels()
+      setLevels(data)
+      if (!strategy && data.length > 0) {
+        setFormData((prev) => ({ ...prev, levelId: data[0].id }))
+      }
+    } catch (error) {
+      console.error('加载成熟度等级失败:', error)
+      setError('加载成熟度等级失败，请稍后重试')
+    }
+  }, [strategy])
+
   useEffect(() => {
     loadLevels()
     if (strategy) {
@@ -40,20 +53,7 @@ export function CoreStrategyForm({ strategy, onClose, onSubmit }: Props) {
         })),
       })
     }
-  }, [strategy])
-
-  const loadLevels = async () => {
-    try {
-      const data = await getMaturityLevels()
-      setLevels(data)
-      if (!strategy && data.length > 0) {
-        setFormData((prev) => ({ ...prev, levelId: data[0].id }))
-      }
-    } catch (error) {
-      console.error('加载成熟度等级失败:', error)
-      setError('加载成熟度等级失败，请稍后重试')
-    }
-  }
+  }, [strategy, loadLevels])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

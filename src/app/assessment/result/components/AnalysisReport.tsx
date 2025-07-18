@@ -1,11 +1,4 @@
 import { useEffect, useState } from 'react'
-import type {
-  MaturityLevel,
-  CoreStrategy,
-  CoreStrategyAction,
-  DimensionStrategy,
-  StrategyAction,
-} from '@/generated/prisma/client'
 import {
   getMaturityLevelByScore,
   getDimensionStrategyByScore,

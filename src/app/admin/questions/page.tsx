@@ -70,11 +70,6 @@ export default function QuestionsPage() {
     setEditingQuestion(null)
   }
 
-  const handleFormSubmit = async () => {
-    await loadData()
-    handleFormClose()
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

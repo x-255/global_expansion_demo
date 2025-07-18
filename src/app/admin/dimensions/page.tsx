@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import { getDimensions, deleteDimension } from './actions'
 import DimensionForm from './components/DimensionForm'
-import { Dimension, DimensionWithQuestions } from './types'
+import { DimensionWithQuestions } from './types'
 
 function DimensionDetail({
   dimension,
   onClose,
 }: {
-  dimension: any
+  dimension: DimensionWithQuestions
   onClose: () => void
 }) {
   return (
@@ -89,7 +89,7 @@ function DimensionDetail({
               各等级描述
             </label>
             <div className="space-y-2">
-              {(dimension.DimensionStrategy || []).map((ds: any) => (
+              {(dimension.DimensionStrategy || []).map((ds) => (
                 <div key={ds.levelId} className="border rounded p-2">
                   <div className="font-semibold">
                     {ds.level?.name || ds.levelId}
@@ -105,8 +105,8 @@ function DimensionDetail({
                     <div className="mt-2">
                       <span className="font-medium">策略与方案：</span>
                       <ul className="list-disc pl-5 mt-1">
-                        {ds.actions.map((action: any, idx: number) => (
-                          <li key={action.id || idx} className="text-gray-900">
+                        {ds.actions.map((action, idx) => (
+                          <li key={idx} className="text-gray-900">
                             {action.content}
                           </li>
                         ))}
@@ -135,8 +135,8 @@ export default function DimensionsPage() {
   const [dimensions, setDimensions] = useState<DimensionWithQuestions[]>([])
   const [showForm, setShowForm] = useState(false)
   const [showDetail, setShowDetail] = useState(false)
-  const [editingDimension, setEditingDimension] = useState<any | null>(null)
-  const [viewingDimension, setViewingDimension] = useState<any | null>(null)
+  const [editingDimension, setEditingDimension] = useState<DimensionWithQuestions | null>(null)
+  const [viewingDimension, setViewingDimension] = useState<DimensionWithQuestions | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -154,12 +154,11 @@ export default function DimensionsPage() {
     }
   }
 
-  const handleView = (dimension: any) => {
+  const handleView = (dimension: DimensionWithQuestions) => {
     setViewingDimension(dimension)
-    setShowDetail(true)
   }
 
-  const handleEdit = (dimension: any) => {
+  const handleEdit = (dimension: DimensionWithQuestions) => {
     setEditingDimension(dimension)
     setShowForm(true)
   }
