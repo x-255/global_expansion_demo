@@ -16,9 +16,17 @@ export async function getDimensions(): Promise<DimensionWithQuestions[]> {
             deleted: false,
           },
         },
+        DimensionStrategy: {
+          include: {
+            level: true,
+            actions: {
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc',
+        order: 'asc',
       },
     })
     return dimensions
@@ -31,55 +39,112 @@ export async function getDimensions(): Promise<DimensionWithQuestions[]> {
 export async function createDimension(
   data: DimensionFormData
 ): Promise<DimensionWithQuestions> {
+  // 1. 创建维度
   const dimension = await prisma.dimension.create({
     data: {
       name: data.name,
       description: data.description,
+      coreCapability: data.coreCapability,
+      weight: data.weight,
+      order: data.order,
       deleted: false,
     },
-    include: {
-      questions: {
-        where: {
-          deleted: false,
-        },
-      },
-    },
   })
-  return dimension
+
+  // 2. 创建所有等级的 DimensionStrategy 和对应的 StrategyAction
+  for (const desc of data.maturityLevelDescriptions) {
+    const dimensionStrategy = await prisma.dimensionStrategy.create({
+      data: {
+        dimensionId: dimension.id,
+        levelId: desc.levelId,
+        definition: desc.definition,
+      },
+    })
+    // 批量插入策略与方案
+    if (desc.strategies && desc.strategies.length > 0) {
+      await prisma.strategyAction.createMany({
+        data: desc.strategies.map((content, idx) => ({
+          dimensionStrategyId: dimensionStrategy.id,
+          dimensionId: dimension.id,
+          levelId: desc.levelId,
+          content,
+          order: idx,
+        })),
+      })
+    }
+  }
+
+  revalidatePath('/admin/dimensions')
+  // 返回带完整信息的维度
+  return getDimensions().then(
+    (list) => list.find((d) => d.id === dimension.id)!
+  )
 }
 
 export async function updateDimension(
   id: number,
   data: DimensionFormData
 ): Promise<DimensionWithQuestions> {
+  // 1. 检查维度是否存在
   const dimension = await prisma.dimension.findUnique({
-    where: {
-      id,
-      deleted: false,
-    },
+    where: { id, deleted: false },
   })
-
   if (!dimension) {
     throw new Error('维度不存在')
   }
 
-  const updated = await prisma.dimension.update({
+  // 2. 删除原有的 DimensionStrategy 及其下的 StrategyAction
+  const oldStrategies = await prisma.dimensionStrategy.findMany({
+    where: { dimensionId: id },
+    select: { id: true },
+  })
+  const oldStrategyIds = oldStrategies.map((s) => s.id)
+  if (oldStrategyIds.length > 0) {
+    await prisma.strategyAction.deleteMany({
+      where: { dimensionStrategyId: { in: oldStrategyIds } },
+    })
+    await prisma.dimensionStrategy.deleteMany({
+      where: { id: { in: oldStrategyIds } },
+    })
+  }
+
+  // 3. 更新维度本身
+  await prisma.dimension.update({
     where: { id },
     data: {
       name: data.name,
       description: data.description,
-    },
-    include: {
-      questions: {
-        where: {
-          deleted: false,
-        },
-      },
+      coreCapability: data.coreCapability,
+      weight: data.weight,
+      order: data.order,
     },
   })
 
+  // 4. 重新插入所有等级的 DimensionStrategy 和对应的 StrategyAction
+  for (const desc of data.maturityLevelDescriptions) {
+    const dimensionStrategy = await prisma.dimensionStrategy.create({
+      data: {
+        dimensionId: id,
+        levelId: desc.levelId,
+        definition: desc.definition,
+      },
+    })
+    if (desc.strategies && desc.strategies.length > 0) {
+      await prisma.strategyAction.createMany({
+        data: desc.strategies.map((content, idx) => ({
+          dimensionStrategyId: dimensionStrategy.id,
+          dimensionId: id,
+          levelId: desc.levelId,
+          content,
+          order: idx,
+        })),
+      })
+    }
+  }
+
   revalidatePath('/admin/dimensions')
-  return updated
+  // 返回带完整信息的维度
+  return getDimensions().then((list) => list.find((d) => d.id === id)!)
 }
 
 export async function deleteDimension(id: number): Promise<void> {

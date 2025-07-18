@@ -27,6 +27,26 @@ const menuItems = [
     ),
   },
   {
+    name: '成熟度等级管理',
+    href: '/admin/maturity-levels',
+    icon: (
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+        />
+      </svg>
+    ),
+  },
+  {
     name: '维度管理',
     href: '/admin/dimensions',
     icon: (
@@ -125,7 +145,9 @@ export default function AdminLayout({
     <div className="min-h-screen bg-gray-100">
       {/* 侧边栏 */}
       <div
-        className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
       >
         <div className="flex items-center justify-between h-16 px-4 bg-blue-600 text-white">
           <h1 className="text-xl font-bold">管理后台</h1>
@@ -157,7 +179,9 @@ export default function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center px-4 py-3 text-gray-600 transition-colors duration-200 hover:bg-gray-100 ${isActive ? 'bg-blue-50 text-blue-600' : ''}`}
+                className={`flex items-center px-4 py-3 text-gray-600 transition-colors duration-200 hover:bg-gray-100 ${
+                  isActive ? 'bg-blue-50 text-blue-600' : ''
+                }`}
               >
                 <span className="mr-3">{item.icon}</span>
                 {item.name}
@@ -169,13 +193,17 @@ export default function AdminLayout({
 
       {/* 主内容区 */}
       <div
-        className={`lg:pl-64 transition-all duration-300 ${isSidebarOpen ? 'pl-64' : 'pl-0'}`}
+        className={`lg:pl-64 transition-all duration-300 ${
+          isSidebarOpen ? 'pl-64' : 'pl-0'
+        }`}
       >
         {/* 顶部栏 */}
         <div className="sticky top-0 z-20 flex items-center justify-between h-16 bg-white shadow-sm px-4">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className={`p-2 rounded-md hover:bg-gray-100 lg:hidden ${isSidebarOpen ? 'hidden' : ''}`}
+            className={`p-2 rounded-md hover:bg-gray-100 lg:hidden ${
+              isSidebarOpen ? 'hidden' : ''
+            }`}
           >
             <svg
               className="w-6 h-6"
