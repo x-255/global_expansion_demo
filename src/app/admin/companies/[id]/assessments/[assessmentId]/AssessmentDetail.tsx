@@ -9,7 +9,7 @@ interface Props {
   dimensions: Array<{
     id: number
     name: string
-    description: string
+    description: string | null
     deleted?: boolean
     questions: Array<{
       id: number
@@ -19,7 +19,7 @@ interface Props {
         id: number
         text: string
         score: number
-        description?: string
+        description?: string | null
       }>
     }>
   }>
@@ -125,7 +125,7 @@ export function AssessmentDetail({
                   得分：{dimScore?.score ?? '-'}
                 </span>
               </div>
-              <p className="text-gray-600 mb-6">{dimension.description}</p>
+              <p className="text-gray-600 mb-6">{dimension.description || '暂无描述'}</p>
 
               <div className="space-y-6">
                 {dimension.questions.map((question) => {
@@ -151,7 +151,7 @@ export function AssessmentDetail({
                           <div className="mt-2">
                             <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                               {option
-                                ? `${option.description}（分数：${option.score}）`
+                                ? `${option.description || '暂无描述'}（分数：${option.score}）`
                                 : '无选项'}
                             </span>
                           </div>

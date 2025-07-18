@@ -54,6 +54,25 @@ export default async function AssessmentDetailPage({ params }: Props) {
   // 过滤掉没有任何已回答问题的维度
   const filteredDimensions = dimensions.filter((d) => d.questions.length > 0)
 
+  // 转换数据格式以匹配组件期望的类型
+  const transformedDimensions = filteredDimensions.map(dimension => ({
+    id: dimension.id,
+    name: dimension.name,
+    description: dimension.description,
+    deleted: dimension.deleted,
+    questions: dimension.questions.map(question => ({
+      id: question.id,
+      text: question.text,
+      deleted: question.deleted,
+      options: question.options.map(option => ({
+        id: option.id,
+        text: option.description, // 数据库字段是 description，组件期望 text
+        score: option.score,
+        description: option.description
+      }))
+    }))
+  }))
+
   // 计算各维度得分、总分、成熟度等级
   const dimensionScores = filteredDimensions.map((dimension) => {
     const dimensionAnswers = answers.filter((a) =>
@@ -109,7 +128,7 @@ export default async function AssessmentDetailPage({ params }: Props) {
 
   return (
     <AssessmentDetail
-      dimensions={filteredDimensions}
+      dimensions={transformedDimensions}
       params={resolvedParams}
       answers={answers}
       dimensionScores={dimensionScores}
