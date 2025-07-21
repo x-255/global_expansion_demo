@@ -14,15 +14,56 @@ export type QuestionWithOptions = Question & {
   options: QuestionOption[]
 }
 
-export async function getQuestions(): Promise<QuestionWithOptions[]> {
+export interface GetQuestionsParams {
+  page?: number
+  pageSize?: number
+  search?: string
+  dimensionId?: number | 'all'
+}
+
+export interface GetQuestionsResult {
+  questions: QuestionWithOptions[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export async function getQuestions(params: GetQuestionsParams = {}): Promise<GetQuestionsResult> {
   try {
-    const questions = await prisma.question.findMany({
-      where: {
+    const { page = 1, pageSize = 10, search = '', dimensionId = 'all' } = params
+
+    // 构建where条件
+    const where: {
+      deleted: boolean
+      dimension: { deleted: boolean }
+      text?: { contains: string; mode: 'insensitive' }
+      dimensionId?: number
+    } = {
+      deleted: false,
+      dimension: {
         deleted: false,
-        dimension: {
-          deleted: false,
-        },
       },
+    }
+
+    // 添加搜索条件
+    if (search.trim()) {
+      where.text = {
+        contains: search.trim(),
+        mode: 'insensitive'
+      }
+    }
+
+    // 添加维度筛选条件
+    if (dimensionId !== 'all') {
+      where.dimensionId = dimensionId
+    }
+
+    // 获取总数
+    const total = await prisma.question.count({ where })
+
+    // 获取分页数据
+    const questions = await prisma.question.findMany({
+      where,
       include: {
         dimension: true,
         options: true,
@@ -30,8 +71,16 @@ export async function getQuestions(): Promise<QuestionWithOptions[]> {
       orderBy: {
         order: 'asc',
       },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     })
-    return questions
+
+    return {
+      questions,
+      total,
+      page,
+      pageSize,
+    }
   } catch (error) {
     console.error('获取问题列表失败:', error)
     throw new Error('获取问题列表失败')

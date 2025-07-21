@@ -164,6 +164,7 @@ export default function ResultPage() {
         </div>
         <RadarChart
           scores={dimensionScores.map((d) => d.score)}
+          averageScores={dimensionScores.map((d) => d.averageScore)}
           dimensions={dimensions}
         />
         <AnalysisReport dimensions={dimensionScores} totalScore={totalScore} />

@@ -1,40 +1,52 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
-import { getCompanies } from './actions'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import type { Company } from '@/generated/prisma/client'
+import { useCallback, useEffect, useState } from 'react'
+import { Pagination } from '../../components/Pagination'
+import { getCompanies, type GetCompaniesResult } from './actions'
+import { CompaniesCards } from './components/CompaniesCards'
+import { CompaniesTable } from './components/CompaniesTable'
 
-interface CompanyWithCount extends Company {
-  _count: {
-    assessments: number
-  }
-}
+const PAGE_SIZE = 12
 
 export default function CompaniesPage() {
   const router = useRouter()
-  const [companies, setCompanies] = useState<CompanyWithCount[]>([])
+  const [companiesData, setCompaniesData] = useState<GetCompaniesResult>({
+    companies: [],
+    total: 0,
+    page: 1,
+    pageSize: PAGE_SIZE,
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [clickedId, setClickedId] = useState<number | null>(null)
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('card')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
 
   // 使用 useCallback 包装 loadCompanies 函数
   const loadCompanies = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await getCompanies()
-      setCompanies(data)
+      const data = await getCompanies({
+        page: currentPage,
+        pageSize: PAGE_SIZE,
+        search: searchTerm,
+      })
+      setCompaniesData(data)
       setLoading(false)
     } catch (error) {
       console.error('加载公司列表失败:', error)
       setError('加载公司列表失败，请稍后重试')
       setLoading(false)
     }
-  }, [])
+  }, [currentPage, searchTerm])
 
   useEffect(() => {
     loadCompanies()
   }, [loadCompanies])
+
+  // 从服务端获取的数据
+  const { companies, total } = companiesData
 
   const handleCompanyClick = (e: React.MouseEvent, companyId: number) => {
     e.preventDefault()
@@ -65,100 +77,129 @@ export default function CompaniesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <h1 className="text-3xl font-bold text-gray-800">公司列表</h1>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+          {/* 搜索框 */}
+          <div className="relative flex-1 sm:flex-initial">
+            <input
+              type="text"
+              placeholder="搜索公司..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value)
+                setCurrentPage(1) // 重置页码
+              }}
+              className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <svg
+              className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+
+          {/* 视图切换按钮 */}
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('card')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'card'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+              title="卡片视图"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+              title="表格视图"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {companies.map((company) => (
-          <Link
-            key={company.id}
-            href={`/admin/companies/${company.id}/assessments`}
-            onClick={(e) => handleCompanyClick(e, company.id)}
-            className={`block bg-white rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-gray-200 relative ${
-              clickedId === company.id ? 'opacity-70' : ''
-            }`}
-          >
-            <div className="flex flex-col space-y-3">
-              <div className="flex justify-between items-start">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {company.name}
-                </h2>
-                <div className="flex items-center bg-blue-50 px-3 py-1 rounded-full">
-                  <span className="font-medium text-blue-600">
-                    {company._count.assessments}
-                  </span>
-                  <span className="text-blue-500 ml-1">评估</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center text-sm text-gray-600">
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                    />
-                  </svg>
-                  {company.industry || '未设置行业'}
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  {company.location || '未设置地区'}
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
-                  {company.size || '未设置规模'}
-                </div>
-              </div>
-            </div>
-            {clickedId === company.id && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 rounded-xl">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-              </div>
-            )}
-          </Link>
-        ))}
+      {/* 搜索结果统计和分页信息 */}
+      <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm text-gray-600">
+        <div>
+          共 {total} 个公司
+          {total > 0 && (
+            <span className="ml-2 text-gray-500">
+              | 显示第 {(currentPage - 1) * PAGE_SIZE + 1}-
+              {Math.min(currentPage * PAGE_SIZE, total)} 条
+            </span>
+          )}
+        </div>
+        {Math.ceil(total / PAGE_SIZE) > 1 && (
+          <div className="text-gray-500">
+            第 {currentPage} 页，共 {Math.ceil(total / PAGE_SIZE)} 页
+          </div>
+        )}
       </div>
+
+      {/* 根据视图模式显示不同的内容 */}
+      {viewMode === 'card' ? (
+        <CompaniesCards
+          companies={companies}
+          clickedId={clickedId}
+          onCompanyClick={handleCompanyClick}
+        />
+      ) : (
+        <CompaniesTable
+          companies={companies}
+          clickedId={clickedId}
+          onCompanyClick={handleCompanyClick}
+        />
+      )}
+
+      {/* 分页控件 */}
+      <Pagination
+        currentPage={currentPage}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        className="mt-8"
+      />
     </div>
   )
 }

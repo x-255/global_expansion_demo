@@ -1,11 +1,70 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import type { CoreStrategyFormData } from './types'
+import type { CoreStrategyFormData, CoreStrategyWithDetails } from './types'
+import type { Prisma } from '@/generated/prisma/client'
 
-export async function getCoreStrategies() {
+export interface GetCoreStrategiesParams {
+  page?: number
+  pageSize?: number
+  search?: string
+  levelId?: number | 'all'
+}
+
+export interface GetCoreStrategiesResult {
+  strategies: CoreStrategyWithDetails[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export async function getCoreStrategies(
+  params: GetCoreStrategiesParams = {}
+): Promise<GetCoreStrategiesResult> {
   try {
+    const { page = 1, pageSize = 10, search = '', levelId = 'all' } = params
+
+    // 构建where条件
+    const where: Prisma.CoreStrategyWhereInput = {}
+
+    // 添加搜索条件
+    if (search.trim()) {
+      where.OR = [
+        {
+          name: {
+            contains: search.trim(),
+          },
+        },
+        {
+          level: {
+            name: {
+              contains: search.trim(),
+            },
+          },
+        },
+        {
+          actions: {
+            some: {
+              content: {
+                contains: search.trim(),
+              },
+            },
+          },
+        },
+      ]
+    }
+
+    // 添加等级筛选条件
+    if (levelId !== 'all') {
+      where.levelId = levelId
+    }
+
+    // 获取总数
+    const total = await prisma.coreStrategy.count({ where })
+
+    // 获取分页数据
     const strategies = await prisma.coreStrategy.findMany({
+      where,
       include: {
         level: true,
         actions: {
@@ -24,8 +83,16 @@ export async function getCoreStrategies() {
           order: 'asc',
         },
       ],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     })
-    return strategies
+
+    return {
+      strategies,
+      total,
+      page,
+      pageSize,
+    }
   } catch (error) {
     console.error('获取核心策略失败:', error)
     throw error

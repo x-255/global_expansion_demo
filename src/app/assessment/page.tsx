@@ -14,7 +14,7 @@ import type {
   QuestionOption,
 } from '@/generated/prisma/client'
 
-interface Question extends PrismaQuestion {
+type Question = PrismaQuestion & {
   options: QuestionOption[]
 }
 

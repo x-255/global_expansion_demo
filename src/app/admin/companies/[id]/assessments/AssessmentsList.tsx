@@ -67,14 +67,11 @@ export function AssessmentsList({ params }: Props) {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">
-                    评估记录 #{assessment.id}
+                    评估时间：{new Date(assessment.createdAt).toLocaleString()}
                   </h3>
                   <div className="text-2xl font-bold text-primary">
                     {assessment.totalScore}分
                   </div>
-                </div>
-                <div className="text-sm text-gray-500 mb-2">
-                  评估时间：{new Date(assessment.createdAt).toLocaleString()}
                 </div>
                 <div className="text-sm text-gray-500 mb-4">
                   成熟度等级：{assessment.maturityLevel?.name || '未评级'}

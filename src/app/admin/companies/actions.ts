@@ -1,10 +1,62 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import type { Company, Prisma } from '@/generated/prisma/client'
 import type { AssessmentWithScore } from './types'
 
-export async function getCompanies() {
+export interface GetCompaniesParams {
+  page?: number
+  pageSize?: number
+  search?: string
+}
+
+export interface GetCompaniesResult {
+  companies: Array<Company & { _count: { assessments: number } }>
+  total: number
+  page: number
+  pageSize: number
+}
+
+export async function getCompanies(
+  params: GetCompaniesParams = {}
+): Promise<GetCompaniesResult> {
+  const { page = 1, pageSize = 12, search = '' } = params
+
+  // 构建where条件
+  const where: Prisma.CompanyWhereInput = {}
+
+  // 添加搜索条件
+  if (search.trim()) {
+    where.OR = [
+      {
+        name: {
+          contains: search.trim(),
+        },
+      },
+      {
+        industry: {
+          contains: search.trim(),
+        },
+      },
+      {
+        location: {
+          contains: search.trim(),
+        },
+      },
+      {
+        size: {
+          contains: search.trim(),
+        },
+      },
+    ]
+  }
+
+  // 获取总数
+  const total = await prisma.company.count({ where })
+
+  // 获取分页数据
   const companies = await prisma.company.findMany({
+    where,
     include: {
       _count: {
         select: {
@@ -13,10 +65,18 @@ export async function getCompanies() {
       },
     },
     orderBy: {
-      id: 'asc',
+      updatedAt: 'desc',
     },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
   })
-  return companies
+
+  return {
+    companies,
+    total,
+    page,
+    pageSize,
+  }
 }
 
 export async function getCompany(id: number) {

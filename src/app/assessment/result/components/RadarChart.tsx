@@ -22,15 +22,20 @@ ChartJS.register(
 
 interface RadarChartProps {
   scores: number[]
+  averageScores: number[]
   dimensions: Dimension[]
 }
 
-export function RadarChart({ scores, dimensions }: RadarChartProps) {
+export function RadarChart({
+  scores,
+  averageScores,
+  dimensions,
+}: RadarChartProps) {
   const data = {
     labels: dimensions.map((d) => d.name),
     datasets: [
       {
-        label: '得分',
+        label: '您的得分',
         data: scores,
         backgroundColor: 'rgba(204, 79, 61, 0.3)', // primary color with higher opacity
         borderColor: '#CC4F3D', // primary color
@@ -41,6 +46,20 @@ export function RadarChart({ scores, dimensions }: RadarChartProps) {
         pointHoverBorderColor: '#B79F67', // gold color
         pointRadius: 4,
         pointHoverRadius: 6,
+      },
+      {
+        label: '平均分',
+        data: averageScores,
+        backgroundColor: 'rgba(183, 159, 103, 0.2)', // gold color with lower opacity
+        borderColor: '#B79F67', // gold color
+        borderWidth: 2,
+        borderDash: [5, 5], // 虚线样式
+        pointBackgroundColor: '#B79F67', // gold color
+        pointBorderColor: '#FFFFFF', // white border
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: '#B79F67', // gold color
+        pointRadius: 3,
+        pointHoverRadius: 5,
       },
     ],
   }
@@ -76,7 +95,17 @@ export function RadarChart({ scores, dimensions }: RadarChartProps) {
     },
     plugins: {
       legend: {
-        display: false,
+        display: true,
+        position: 'bottom' as const,
+        labels: {
+          color: '#FFFFFF', // white color
+          font: {
+            size: 14,
+            weight: 500,
+          },
+          padding: 20,
+          usePointStyle: true,
+        },
       },
       tooltip: {
         backgroundColor: 'rgba(34, 34, 34, 0.9)', // gray-1 with opacity
@@ -90,7 +119,7 @@ export function RadarChart({ scores, dimensions }: RadarChartProps) {
   }
 
   return (
-    <div className="w-full max-w-xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto">
       <Radar data={data} options={options} />
     </div>
   )

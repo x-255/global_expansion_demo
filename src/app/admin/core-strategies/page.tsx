@@ -1,18 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   getCoreStrategies,
   deleteCoreStrategy,
   getMaturityLevels,
+  type GetCoreStrategiesResult,
 } from './actions'
 import { CoreStrategyForm } from './components/CoreStrategyForm'
 import { CoreStrategyDetail } from './components/CoreStrategyDetail'
 import type { CoreStrategyWithDetails } from './types'
 import type { MaturityLevel } from '@/generated/prisma/client'
+import { Pagination } from '@/app/components/Pagination'
+
+const PAGE_SIZE = 10
 
 export default function CoreStrategiesPage() {
-  const [strategies, setStrategies] = useState<CoreStrategyWithDetails[]>([])
+  const [strategiesData, setStrategiesData] = useState<GetCoreStrategiesResult>({
+    strategies: [],
+    total: 0,
+    page: 1,
+    pageSize: PAGE_SIZE,
+  })
   const [levels, setLevels] = useState<MaturityLevel[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -24,18 +33,22 @@ export default function CoreStrategiesPage() {
     useState<CoreStrategyWithDetails | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLevel, setSelectedLevel] = useState<number | 'all'>('all')
+  const [currentPage, setCurrentPage] = useState(1)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  // 加载数据的函数
+  const loadData = useCallback(async () => {
     try {
-      const [strategiesData, levelsData] = await Promise.all([
-        getCoreStrategies(),
+      setLoading(true)
+      const [strategiesResult, levelsData] = await Promise.all([
+        getCoreStrategies({
+          page: currentPage,
+          pageSize: PAGE_SIZE,
+          search: searchTerm,
+          levelId: selectedLevel,
+        }),
         getMaturityLevels(),
       ])
-      setStrategies(strategiesData)
+      setStrategiesData(strategiesResult)
       setLevels(levelsData)
       setLoading(false)
     } catch (error) {
@@ -43,22 +56,14 @@ export default function CoreStrategiesPage() {
       setError('加载数据失败，请稍后重试')
       setLoading(false)
     }
-  }
+  }, [currentPage, searchTerm, selectedLevel])
 
-  // 过滤策略列表
-  const filteredStrategies = strategies.filter((strategy) => {
-    const matchesSearch =
-      strategy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      strategy.level.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      strategy.actions.some((action) =>
-        action.content.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
-    const matchesLevel =
-      selectedLevel === 'all' || strategy.levelId === selectedLevel
-
-    return matchesSearch && matchesLevel
-  })
+  // 从服务端获取的数据
+  const { strategies, total } = strategiesData
 
   const handleEdit = (strategy: CoreStrategyWithDetails) => {
     setEditingStrategy(strategy)
@@ -134,18 +139,22 @@ export default function CoreStrategiesPage() {
             type="text"
             placeholder="搜索策略名称、等级名称或行动点内容..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value)
+              setCurrentPage(1) // 重置页码
+            }}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
         <div className="w-48">
           <select
             value={selectedLevel}
-            onChange={(e) =>
+            onChange={(e) => {
               setSelectedLevel(
                 e.target.value === 'all' ? 'all' : Number(e.target.value)
               )
-            }
+              setCurrentPage(1) // 重置页码
+            }}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_12px_center] bg-no-repeat pr-12"
           >
             <option value="all">所有等级</option>
@@ -160,7 +169,12 @@ export default function CoreStrategiesPage() {
 
       {/* 结果统计 */}
       <div className="mb-4 text-gray-600">
-        找到 {filteredStrategies.length} 个策略
+        找到 {total} 个策略
+        {total > 0 && (
+          <span className="ml-2 text-gray-500">
+            | 显示第 {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, total)} 条
+          </span>
+        )}
       </div>
 
       {/* 策略列表 */}
@@ -186,7 +200,7 @@ export default function CoreStrategiesPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredStrategies.map((strategy) => (
+            {strategies.map((strategy) => (
               <tr key={strategy.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{strategy.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -223,6 +237,15 @@ export default function CoreStrategiesPage() {
           </tbody>
         </table>
       </div>
+
+      {/* 分页控件 */}
+      <Pagination
+        currentPage={currentPage}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        className="mt-8"
+      />
 
       {/* 策略表单弹窗 */}
       {showForm && (

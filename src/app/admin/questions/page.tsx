@@ -1,16 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { getQuestions } from './actions'
+import { useState, useEffect, useCallback } from 'react'
+import { getQuestions, type GetQuestionsResult } from './actions'
 import { getDimensions } from '../dimensions/actions'
 import QuestionForm from './components/QuestionForm'
 import type { QuestionWithOptions } from './actions'
 import type { Dimension } from '@/generated/prisma/client'
+import { Pagination } from '@/app/components/Pagination'
 
 const PAGE_SIZE = 10
 
 export default function QuestionsPage() {
-  const [questions, setQuestions] = useState<QuestionWithOptions[]>([])
+  const [questionsData, setQuestionsData] = useState<GetQuestionsResult>({
+    questions: [],
+    total: 0,
+    page: 1,
+    pageSize: PAGE_SIZE,
+  })
   const [dimensions, setDimensions] = useState<Dimension[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -23,17 +29,20 @@ export default function QuestionsPage() {
   )
   const [currentPage, setCurrentPage] = useState(1)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  // 加载数据的函数
+  const loadData = useCallback(async () => {
     try {
-      const [questionsData, dimensionsData] = await Promise.all([
-        getQuestions(),
+      setLoading(true)
+      const [questionsResult, dimensionsData] = await Promise.all([
+        getQuestions({
+          page: currentPage,
+          pageSize: PAGE_SIZE,
+          search: searchTerm,
+          dimensionId: selectedDimension,
+        }),
         getDimensions(),
       ])
-      setQuestions(questionsData)
+      setQuestionsData(questionsResult)
       setDimensions(dimensionsData)
       setLoading(false)
     } catch (error) {
@@ -41,24 +50,14 @@ export default function QuestionsPage() {
       setError('加载数据失败，请稍后重试')
       setLoading(false)
     }
-  }
+  }, [currentPage, searchTerm, selectedDimension])
 
-  // 过滤和搜索问题
-  const filteredQuestions = questions.filter((question) => {
-    const matchesSearch = question.text
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-    const matchesDimension =
-      selectedDimension === 'all' || question.dimensionId === selectedDimension
-    return matchesSearch && matchesDimension
-  })
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
-  // 计算分页数据
-  const totalPages = Math.ceil(filteredQuestions.length / PAGE_SIZE)
-  const paginatedQuestions = filteredQuestions.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  )
+  // 从服务端获取的数据
+  const { questions, total } = questionsData
 
   const handleEdit = (question: QuestionWithOptions) => {
     setEditingQuestion(question)
@@ -135,7 +134,12 @@ export default function QuestionsPage() {
 
       {/* 结果统计 */}
       <div className="mb-4 text-gray-600">
-        找到 {filteredQuestions.length} 个问题
+        找到 {total} 个问题
+        {total > 0 && (
+          <span className="ml-2 text-gray-500">
+            | 显示第 {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, total)} 条
+          </span>
+        )}
       </div>
 
       {/* 问题列表 */}
@@ -153,6 +157,9 @@ export default function QuestionsPage() {
                 权重
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                排序
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 选项数量
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -161,7 +168,7 @@ export default function QuestionsPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {paginatedQuestions.map((question) => (
+            {questions.map((question) => (
               <tr key={question.id}>
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900 line-clamp-2">
@@ -173,6 +180,9 @@ export default function QuestionsPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {question.weight}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {question.order}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {question.options.length}
@@ -192,63 +202,13 @@ export default function QuestionsPage() {
       </div>
 
       {/* 分页控件 */}
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`px-3 py-1 border rounded-md cursor-pointer ${
-                currentPage === page
-                  ? 'bg-primary text-white'
-                  : 'hover:bg-gray-50'
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        className="mt-8"
+      />
 
       {/* 问题表单弹窗 */}
       {showForm && (
