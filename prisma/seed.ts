@@ -47,6 +47,7 @@ async function main() {
           '缺乏战略规划、市场洞察、资源协同等核心能力，国际化实践零散且无体系',
         minScore: 1.0,
         maxScore: 1.99,
+        icon: '🌱',
       },
     }),
     prisma.maturityLevel.create({
@@ -58,6 +59,7 @@ async function main() {
           '有局部能力（如单一市场调研或简单本地化），但缺乏动态优化和资源整合',
         minScore: 2.0,
         maxScore: 2.99,
+        icon: '🏗️',
       },
     }),
     prisma.maturityLevel.create({
@@ -69,6 +71,7 @@ async function main() {
           '拥有完整框架（如供应链管理或品牌传播），但效率、创新性或抗风险能力不足',
         minScore: 3.0,
         maxScore: 3.99,
+        icon: '🏢',
       },
     }),
     prisma.maturityLevel.create({
@@ -79,6 +82,7 @@ async function main() {
         coreFeatures: '能力成熟且可复制，具备行业领先实践，但尚未主导规则制定',
         minScore: 4.0,
         maxScore: 4.99,
+        icon: '🚀',
       },
     }),
     prisma.maturityLevel.create({
@@ -90,6 +94,7 @@ async function main() {
           '通过创新、生态联盟或价值观输出定义行业标准，具备全球影响力',
         minScore: 5.0,
         maxScore: 5.0,
+        icon: '🌟',
       },
     }),
   ])
@@ -103,6 +108,7 @@ async function main() {
       weight: 1.0,
       order: 1,
       deleted: false,
+      icon: '🎯',
     },
   })
 
@@ -114,6 +120,7 @@ async function main() {
       weight: 1.0,
       order: 2,
       deleted: false,
+      icon: '🗺️',
     },
   })
 
@@ -125,6 +132,7 @@ async function main() {
       weight: 1.0,
       order: 3,
       deleted: false,
+      icon: '🌍',
     },
   })
 
@@ -136,6 +144,7 @@ async function main() {
       weight: 1.0,
       order: 4,
       deleted: false,
+      icon: '🚚',
     },
   })
 
@@ -147,6 +156,7 @@ async function main() {
       weight: 1.0,
       order: 5,
       deleted: false,
+      icon: '🛡️',
     },
   })
 
@@ -158,6 +168,7 @@ async function main() {
       weight: 1.0,
       order: 6,
       deleted: false,
+      icon: '🤝',
     },
   })
 

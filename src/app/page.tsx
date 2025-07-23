@@ -6,6 +6,7 @@ import { getOrCreateCompany } from './actions'
 import { useAssessmentStore } from './store/assessment'
 import Image from 'next/image'
 import { DynamicBackground } from './components/DynamicBackground'
+import { ModelFrameworkWrapper } from './components/ModelFrameworkWrapper'
 
 export default function Home() {
   const [companyName, setCompanyName] = useState('')
@@ -100,7 +101,7 @@ export default function Home() {
         {/* 特色功能部分 */}
         <section
           id="features"
-          className="py-32 relative overflow-hidden bg-black"
+          className="py-12 relative overflow-hidden bg-black"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20 animate-fade-in">
@@ -137,7 +138,7 @@ export default function Home() {
         </section>
 
         {/* 评估流程部分 */}
-        <section id="process" className="py-32 bg-black">
+        <section id="process" className="py-22 bg-black">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
               <h2 className="text-4xl font-bold mb-4 text-primary">评估流程</h2>
@@ -162,7 +163,7 @@ export default function Home() {
                     <p className="text-white flex-1">{step.description}</p>
                   </div>
                   {index < steps.length - 1 && (
-                    <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                    <div className="hidden lg:block absolute top-1/2 -right-7 transform -translate-y-1/2">
                       <Image
                         src="/arrow-right.svg"
                         alt="箭头"
@@ -175,6 +176,16 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* 模型框架展示部分 */}
+        <section id="model" className="py-12 bg-black">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ModelFrameworkWrapper
+              title="企业出海能力评估模型"
+              className="animate-fade-in"
+            />
           </div>
         </section>
 

@@ -47,6 +47,7 @@ export async function createDimension(
       coreCapability: data.coreCapability,
       weight: data.weight,
       order: data.order,
+      icon: '📊', // 默认图标
       deleted: false,
     },
   })
@@ -117,6 +118,7 @@ export async function updateDimension(
       coreCapability: data.coreCapability,
       weight: data.weight,
       order: data.order,
+      icon: '📊', // 保持默认图标
     },
   })
 

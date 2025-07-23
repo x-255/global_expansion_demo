@@ -28,6 +28,7 @@ export async function createMaturityLevel(data: MaturityLevelFormData) {
         coreFeatures: data.coreFeatures,
         minScore: data.minScore,
         maxScore: data.maxScore,
+        icon: '📊', // 默认图标
       },
     })
     revalidatePath('/admin/maturity-levels')
@@ -66,6 +67,7 @@ export async function updateMaturityLevel(
         coreFeatures: data.coreFeatures,
         minScore: data.minScore,
         maxScore: data.maxScore,
+        icon: '📊', // 保持默认图标
       },
     })
 

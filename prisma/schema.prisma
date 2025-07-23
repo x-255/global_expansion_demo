@@ -39,6 +39,7 @@ model MaturityLevel {
   coreFeatures      String // e.g. "缺乏战略规划、市场洞察、资源协同等核心能力，国际化实践零散且无体系"
   minScore          Float // Minimum score for this level
   maxScore          Float // Maximum score for this level
+  icon              String
   strategies        CoreStrategy[]
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -55,6 +56,7 @@ model Dimension {
   coreCapability    String // e.g. "战略制定、目标管理、资源调配"
   weight            Float               @default(1.0) // Dimension weight
   order             Int                 @default(0) // Display/processing order
+  icon              String
   questions         Question[]
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
