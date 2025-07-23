@@ -200,6 +200,12 @@ export default function AssessmentPage() {
 
     // 跳转到最后一组
     setGroupIdx(dimensions.length - 1)
+    setTimeout(() => {
+      window.scrollTo({
+        top: 9999,
+        behavior: 'smooth',
+      })
+    }, 0)
   }
 
   const handleComplete = async () => {
