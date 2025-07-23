@@ -188,6 +188,7 @@ export default function CompaniesPage() {
         <CompaniesTable
           companies={companies}
           clickedId={clickedId}
+          onCompanyUpdated={loadCompanies}
           onCompanyClick={handleCompanyClick}
         />
       )}

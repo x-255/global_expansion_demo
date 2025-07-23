@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import type { Company, Prisma } from '@/generated/prisma/client'
 import type { AssessmentWithScore } from './types'
+import { revalidatePath } from 'next/cache'
 
 export interface GetCompaniesParams {
   page?: number
@@ -231,4 +232,27 @@ export async function getCompanyAssessments(
     console.error('获取评估记录失败:', error)
     throw error
   }
+}
+
+export interface UpdateCompanyState {}
+
+export async function updateCompany(
+  prevState: void,
+  formdata: FormData,
+  id?: number
+) {
+  if (!id) return
+  const name = formdata.get('name') as string
+  const industry = formdata.get('industry') as string
+  const size = formdata.get('size') as string
+  const location = formdata.get('location') as string
+  await prisma.company.update({
+    where: { id },
+    data: {
+      name,
+      industry,
+      size,
+      location,
+    },
+  })
 }

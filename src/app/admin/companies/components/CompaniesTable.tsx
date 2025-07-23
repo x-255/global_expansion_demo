@@ -1,7 +1,9 @@
 import type { Company } from '@/generated/prisma/client'
 import Link from 'next/link'
+import { useState } from 'react'
+import CompaniesForm from './CompaniesForm'
 
-type CompanyWithCount = Company & {
+export type CompanyWithCount = Company & {
   _count: {
     assessments: number
   }
@@ -11,18 +13,41 @@ interface CompaniesTableProps {
   companies: CompanyWithCount[]
   clickedId: number | null
   onCompanyClick: (e: React.MouseEvent, companyId: number) => void
+  onCompanyUpdated: () => void
 }
 
 export function CompaniesTable({
   companies,
   clickedId,
   onCompanyClick,
+  onCompanyUpdated,
 }: CompaniesTableProps) {
+  const [loading, setLoading] = useState(false)
+  const [showForm, setShowForm] = useState(false)
+  const [editingCompany, setEditingCompany] = useState<CompanyWithCount | null>(
+    null
+  )
+
+  const handleEdit = (company: CompanyWithCount) => {
+    setLoading(true)
+    setEditingCompany(company)
+    setShowForm(true)
+  }
+
+  const handleCloseForm = () => {
+    setShowForm(false)
+    setEditingCompany(null)
+    setLoading(false)
+  }
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors">
+              <div className="flex items-center gap-1">ID</div>
+            </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors">
               <div className="flex items-center gap-1">公司名称</div>
             </th>
@@ -56,6 +81,11 @@ export function CompaniesTable({
             >
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">
+                  {company.id}
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm font-medium text-gray-900">
                   {company.name}
                 </div>
               </td>
@@ -86,7 +116,7 @@ export function CompaniesTable({
                 <Link
                   href={`/admin/companies/${company.id}/assessments`}
                   onClick={(e) => onCompanyClick(e, company.id)}
-                  className="text-blue-600 hover:text-blue-900 transition-colors"
+                  className="text-blue-600 hover:text-blue-900 transition-colors mr-4"
                 >
                   {clickedId === company.id ? (
                     <div className="flex items-center">
@@ -97,6 +127,13 @@ export function CompaniesTable({
                     '查看详情'
                   )}
                 </Link>
+                <button
+                  className="text-indigo-600 hover:text-indigo-900 mr-4"
+                  onClick={() => handleEdit(company)}
+                  disabled={loading}
+                >
+                  编辑
+                </button>
               </td>
             </tr>
           ))}
@@ -125,6 +162,14 @@ export function CompaniesTable({
             没有找到符合条件的公司记录
           </p>
         </div>
+      )}
+
+      {showForm && (
+        <CompaniesForm
+          company={editingCompany}
+          onClose={handleCloseForm}
+          onUpdated={onCompanyUpdated}
+        />
       )}
     </div>
   )
