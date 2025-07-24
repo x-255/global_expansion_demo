@@ -1,6 +1,7 @@
 import { useActionState } from 'react'
 import { CompanyWithCount } from './CompaniesTable'
 import { updateCompany } from '../actions'
+import { Modal, Button, Input } from '@/components/admin'
 
 interface Props {
   company: CompanyWithCount | null
@@ -9,7 +10,7 @@ interface Props {
 }
 
 export default function CompaniesForm({ company, onClose, onUpdated }: Props) {
-  const [_, updateAction, isPending] = useActionState(
+  const [, updateAction, isPending] = useActionState(
     async (prevState: void, formData: FormData) => {
       await updateCompany(prevState, formData, company?.id)
       onUpdated()
@@ -18,76 +19,53 @@ export default function CompaniesForm({ company, onClose, onUpdated }: Props) {
   )
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <form action={updateAction}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              公司名称
-            </label>
-            <input
-              type="text"
-              name="name"
-              defaultValue={company?.name}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={company ? '编辑公司信息' : '添加公司'}
+      size="md"
+    >
+      <form action={updateAction} className="flex flex-col flex-1">
+        <Modal.Body className="space-y-6">
+          <Input
+            label="公司名称"
+            name="name"
+            defaultValue={company?.name}
+            required
+            placeholder="请输入公司名称"
+          />
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              行业
-            </label>
-            <input
-              type="text"
-              name="industry"
-              defaultValue={company?.industry ?? ''}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
+          <Input
+            label="行业"
+            name="industry"
+            defaultValue={company?.industry ?? ''}
+            placeholder="请输入所属行业"
+          />
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              规模
-            </label>
-            <input
-              type="text"
-              name="size"
-              defaultValue={company?.size ?? ''}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
+          <Input
+            label="规模"
+            name="size"
+            defaultValue={company?.size ?? ''}
+            placeholder="请输入公司规模"
+          />
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              地点
-            </label>
-            <input
-              type="text"
-              name="location"
-              defaultValue={company?.location ?? ''}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
+          <Input
+            label="地点"
+            name="location"
+            defaultValue={company?.location ?? ''}
+            placeholder="请输入公司地点"
+          />
+        </Modal.Body>
 
-          <div className="flex justify-end gap-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              取消
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              保存
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <Modal.Footer>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            取消
+          </Button>
+          <Button type="submit" variant="primary" loading={isPending}>
+            保存
+          </Button>
+        </Modal.Footer>
+      </form>
+    </Modal>
   )
 }

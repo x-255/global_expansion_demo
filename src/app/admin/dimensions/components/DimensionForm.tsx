@@ -1,7 +1,10 @@
+'use client'
+
 import { useState, useEffect, useRef } from 'react'
 import { createDimension, updateDimension } from '../actions'
 import { DimensionFormData } from '../types'
 import { getMaturityLevels } from '../../maturity-levels/actions'
+import { Modal, Button } from '@/components/admin'
 
 interface DimensionFormProps {
   dimension?: {
@@ -39,13 +42,15 @@ export default function DimensionForm({
 }: DimensionFormProps) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [maturityLevels, setMaturityLevels] = useState<Array<{
-    id: number
-    name: string
-    level: number
-    minScore: number
-    maxScore: number
-  }>>([])
+  const [maturityLevels, setMaturityLevels] = useState<
+    Array<{
+      id: number
+      name: string
+      level: number
+      minScore: number
+      maxScore: number
+    }>
+  >([])
   // 典型特征
   const [maturityLevelDescriptions, setMaturityLevelDescriptions] = useState<{
     [levelId: number]: { definition: string }
@@ -172,13 +177,14 @@ export default function DimensionForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">
-          {dimension ? '编辑维度' : '添加维度'}
-        </h2>
-
-        <form onSubmit={handleSubmit}>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={dimension ? '编辑维度' : '添加维度'}
+      size="lg"
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col flex-1">
+        <Modal.Body className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -330,26 +336,22 @@ export default function DimensionForm({
           </div>
 
           {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
+        </Modal.Body>
 
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              disabled={loading}
-            >
-              取消
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-              disabled={loading}
-            >
-              {loading ? '保存中...' : '保存'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <Modal.Footer>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            disabled={loading}
+          >
+            取消
+          </Button>
+          <Button type="submit" variant="primary" loading={loading}>
+            保存
+          </Button>
+        </Modal.Footer>
+      </form>
+    </Modal>
   )
 }

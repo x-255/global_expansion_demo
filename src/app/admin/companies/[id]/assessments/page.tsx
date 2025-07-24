@@ -1,6 +1,7 @@
 'use client'
 import { Suspense } from 'react'
 import { AssessmentsList } from './AssessmentsList'
+import AssessmentHeader from './AssessmentHeader'
 
 interface Props {
   params: Promise<{
@@ -17,6 +18,7 @@ export default function CompanyAssessmentsPage({ params }: Props) {
         </div>
       }
     >
+      <AssessmentHeader params={params} />
       <AssessmentsList params={params} />
     </Suspense>
   )

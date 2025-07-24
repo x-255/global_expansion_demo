@@ -5,6 +5,7 @@ import { Pagination } from '../../components/Pagination'
 import { getCompanies, type GetCompaniesResult } from './actions'
 import { CompaniesCards } from './components/CompaniesCards'
 import { CompaniesTable } from './components/CompaniesTable'
+import { Input } from '@/components/admin'
 
 const PAGE_SIZE = 12
 
@@ -76,36 +77,42 @@ export default function CompaniesPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">公司列表</h1>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+    <div className="space-y-6">
+      {/* 页面头部 */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">企业管理</h1>
+          <p className="text-slate-600 mt-2">
+            管理所有注册的企业信息和评估数据
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
           {/* 搜索框 */}
-          <div className="relative flex-1 sm:flex-initial">
-            <input
-              type="text"
-              placeholder="搜索公司..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setCurrentPage(1) // 重置页码
-              }}
-              className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <svg
-              className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
+          <Input
+            placeholder="搜索公司名称、行业或地区..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value)
+              setCurrentPage(1)
+            }}
+            leftIcon={
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            }
+            className="w-full sm:w-80"
+          />
 
           {/* 视图切换按钮 */}
           <div className="flex bg-gray-100 rounded-lg p-1">
@@ -187,7 +194,6 @@ export default function CompaniesPage() {
       ) : (
         <CompaniesTable
           companies={companies}
-          clickedId={clickedId}
           onCompanyUpdated={loadCompanies}
           onCompanyClick={handleCompanyClick}
         />

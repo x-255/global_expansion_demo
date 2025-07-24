@@ -4,9 +4,11 @@ import { useState, useEffect, useCallback } from 'react'
 import { getQuestions, type GetQuestionsResult } from './actions'
 import { getDimensions } from '../dimensions/actions'
 import QuestionForm from './components/QuestionForm'
+import QuestionDetail from './components/QuestionDetail'
 import type { QuestionWithOptions } from './actions'
 import type { Dimension } from '@/generated/prisma/client'
 import { Pagination } from '@/app/components/Pagination'
+import { Card, Button, Table, Input } from '@/components/admin'
 
 const PAGE_SIZE = 10
 
@@ -22,6 +24,9 @@ export default function QuestionsPage() {
   const [error, setError] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingQuestion, setEditingQuestion] =
+    useState<QuestionWithOptions | null>(null)
+  const [showDetail, setShowDetail] = useState(false)
+  const [viewingQuestion, setViewingQuestion] =
     useState<QuestionWithOptions | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDimension, setSelectedDimension] = useState<number | 'all'>(
@@ -69,6 +74,16 @@ export default function QuestionsPage() {
     setEditingQuestion(null)
   }
 
+  const handleView = (question: QuestionWithOptions) => {
+    setViewingQuestion(question)
+    setShowDetail(true)
+  }
+
+  const handleDetailClose = () => {
+    setShowDetail(false)
+    setViewingQuestion(null)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -76,6 +91,61 @@ export default function QuestionsPage() {
       </div>
     )
   }
+
+  const columns = [
+    {
+      key: 'id',
+      title: 'ID',
+      width: 80,
+    },
+    {
+      key: 'text',
+      title: '问题内容',
+      width: 300,
+    },
+    {
+      key: 'dimension',
+      title: '所属维度',
+      width: 150,
+      render: (_: unknown, record: QuestionWithOptions) =>
+        record.dimension?.name || '-',
+    },
+    {
+      key: 'order',
+      title: '排序',
+      width: 100,
+    },
+    {
+      key: 'options',
+      title: '选项数量',
+      width: 120,
+      render: (_: unknown, record: QuestionWithOptions) =>
+        record.options?.length || 0,
+    },
+    {
+      key: 'actions',
+      title: '操作',
+      width: 150,
+      render: (_: unknown, record: QuestionWithOptions) => (
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => handleView(record)}
+          >
+            查看详情
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+        </div>
+      ),
+    },
+  ]
 
   if (error) {
     return (
@@ -86,120 +156,75 @@ export default function QuestionsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">问题管理</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+    <div className="space-y-6">
+      <Card>
+        <Card.Header
+          actions={<Button onClick={() => setShowForm(true)}>添加问题</Button>}
         >
-          添加问题
-        </button>
-      </div>
+          <h1 className="text-2xl font-semibold text-slate-900">问题管理</h1>
+        </Card.Header>
 
-      {/* 搜索和筛选区域 */}
-      <div className="mb-6 flex gap-4">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="搜索问题内容..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value)
-              setCurrentPage(1) // 重置页码
-            }}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="w-48">
-          <select
-            value={selectedDimension}
-            onChange={(e) => {
-              setSelectedDimension(
-                e.target.value === 'all' ? 'all' : Number(e.target.value)
-              )
-              setCurrentPage(1) // 重置页码
-            }}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_12px_center] bg-no-repeat pr-12"
-          >
-            <option value="all">所有维度</option>
-            {dimensions.map((dimension) => (
-              <option key={dimension.id} value={dimension.id}>
-                {dimension.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* 结果统计 */}
-      <div className="mb-4 text-gray-600">
-        找到 {total} 个问题
-        {total > 0 && (
-          <span className="ml-2 text-gray-500">
-            | 显示第 {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, total)} 条
-          </span>
-        )}
-      </div>
-
-      {/* 问题列表 */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                问题内容
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                所属维度
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                权重
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                排序
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                选项数量
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {questions.map((question) => (
-              <tr key={question.id}>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900 line-clamp-2">
-                    {question.text}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {question.dimension.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {question.weight}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {question.order}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {question.options.length}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => handleEdit(question)}
-                    className="text-primary hover:text-primary-dark"
+        <Card.Body>
+          {/* 搜索和筛选区域 */}
+          <div className="mb-6 flex gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="搜索问题内容..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setCurrentPage(1)
+                }}
+                leftIcon={
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    编辑
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                }
+              />
+            </div>
+            <div className="w-48">
+              <select
+                value={selectedDimension}
+                onChange={(e) => {
+                  setSelectedDimension(
+                    e.target.value === 'all' ? 'all' : Number(e.target.value)
+                  )
+                  setCurrentPage(1)
+                }}
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              >
+                <option value="all">所有维度</option>
+                {dimensions.map((dimension) => (
+                  <option key={dimension.id} value={dimension.id}>
+                    {dimension.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+
+      <Card>
+        <Card.Body className="p-0">
+          <Table
+            columns={columns}
+            data={questions}
+            loading={loading}
+            emptyText="暂无问题数据"
+          />
+        </Card.Body>
+      </Card>
 
       {/* 分页控件 */}
       <Pagination
@@ -216,6 +241,14 @@ export default function QuestionsPage() {
           question={editingQuestion || undefined}
           dimensions={dimensions}
           onClose={handleFormClose}
+        />
+      )}
+
+      {/* 问题详情弹窗 */}
+      {showDetail && viewingQuestion && (
+        <QuestionDetail
+          question={viewingQuestion}
+          onClose={handleDetailClose}
         />
       )}
     </div>

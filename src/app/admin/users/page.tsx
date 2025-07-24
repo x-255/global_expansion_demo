@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { getAdmins, deleteAdmin } from './actions'
 import UserForm from './components/UserForm'
 import type { Admin } from './types'
+import { Card, Button, Table } from '@/components/admin'
 
 export default function UsersPage() {
   const [admins, setAdmins] = useState<Admin[]>([])
@@ -54,79 +55,81 @@ export default function UsersPage() {
     loadAdmins()
   }
 
+  const columns = [
+    {
+      key: 'id',
+      title: 'ID',
+      width: 80,
+    },
+    {
+      key: 'username',
+      title: '用户名',
+      width: 150,
+    },
+    {
+      key: 'name',
+      title: '姓名',
+      width: 150,
+    },
+    {
+      key: 'createdAt',
+      title: '创建时间',
+      width: 180,
+      render: (_: unknown, record: Admin) =>
+        new Date(record.createdAt).toLocaleString(),
+    },
+    {
+      key: 'actions',
+      title: '操作',
+      width: 150,
+      render: (_: unknown, record: Admin) => (
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+          <Button
+            size="sm"
+            variant="error"
+            onClick={() => handleDelete(record.id)}
+            loading={loading}
+          >
+            删除
+          </Button>
+        </div>
+      ),
+    },
+  ]
+
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">管理员管理</h1>
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-          onClick={() => setShowForm(true)}
+    <div className="space-y-6">
+      <Card>
+        <Card.Header
+          actions={
+            <Button onClick={() => setShowForm(true)}>添加管理员</Button>
+          }
         >
-          添加管理员
-        </button>
-      </div>
+          <h1 className="text-2xl font-semibold text-slate-900">管理员管理</h1>
+        </Card.Header>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">{error}</div>
-      )}
+        <Card.Body className="p-0">
+          {error && (
+            <div className="mx-6 mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                用户名
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                姓名
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                创建时间
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {admins.map((admin) => (
-              <tr key={admin.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {admin.id}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {admin.username}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {admin.name || '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(admin.createdAt).toLocaleString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    onClick={() => handleEdit(admin)}
-                    disabled={loading}
-                  >
-                    编辑
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-900"
-                    onClick={() => handleDelete(admin.id)}
-                    disabled={loading}
-                  >
-                    删除
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <Table
+            columns={columns}
+            data={admins}
+            loading={loading}
+            emptyText="暂无管理员数据"
+          />
+        </Card.Body>
+      </Card>
 
       {showForm && (
         <UserForm admin={editingAdmin || undefined} onClose={handleCloseForm} />

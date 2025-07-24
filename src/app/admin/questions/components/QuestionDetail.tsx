@@ -1,73 +1,102 @@
 'use client'
 
-import { MaturityLevel } from '../types'
 import { Modal, Button } from '@/components/admin'
+import type { QuestionWithOptions } from '../actions'
 
-interface MaturityLevelDetailProps {
-  maturityLevel: MaturityLevel
+interface QuestionDetailProps {
+  question: QuestionWithOptions
   onClose: () => void
 }
 
-export default function MaturityLevelDetail({
-  maturityLevel,
+export default function QuestionDetail({
+  question,
   onClose,
-}: MaturityLevelDetailProps) {
+}: QuestionDetailProps) {
   return (
-    <Modal isOpen={true} onClose={onClose} title="成熟度等级详情" size="lg">
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="问题详情"
+      size="lg"
+    >
       <Modal.Body className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              等级数值
+              所属维度
             </label>
             <p className="text-slate-900 bg-slate-50 px-3 py-2 rounded-lg">
-              {maturityLevel.level}
+              {question.dimension?.name || '未知维度'}
             </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              等级名称
+              权重
             </label>
             <p className="text-slate-900 bg-slate-50 px-3 py-2 rounded-lg">
-              {maturityLevel.name}
+              {question.weight}
             </p>
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-2">
-            等级描述
+            题目内容
           </label>
           <p className="text-slate-900 bg-slate-50 px-3 py-2 rounded-lg whitespace-pre-wrap">
-            {maturityLevel.description}
-          </p>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            核心特征
-          </label>
-          <p className="text-slate-900 bg-slate-50 px-3 py-2 rounded-lg whitespace-pre-wrap">
-            {maturityLevel.coreFeatures}
+            {question.text}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              最小分数
+              排序
             </label>
             <p className="text-slate-900 bg-slate-50 px-3 py-2 rounded-lg">
-              {maturityLevel.minScore}
+              {question.order}
             </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              最大分数
+              选项数量
             </label>
             <p className="text-slate-900 bg-slate-50 px-3 py-2 rounded-lg">
-              {maturityLevel.maxScore}
+              {question.options?.length || 0} 个选项
             </p>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            选项详情
+          </label>
+          <div className="space-y-3">
+            {question.options?.map((option, index) => (
+              <div
+                key={option.id}
+                className="bg-slate-50 px-3 py-2 rounded-lg border border-slate-200"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <p className="text-slate-900 font-medium">
+                      选项 {index + 1}
+                    </p>
+                    <p className="text-slate-700 mt-1">
+                      {option.description}
+                    </p>
+                  </div>
+                  <div className="ml-4 text-right">
+                    <p className="text-sm text-slate-600">分数</p>
+                    <p className="text-lg font-semibold text-indigo-600">
+                      {option.score}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )) || (
+              <p className="text-slate-500 text-center py-4">暂无选项</p>
+            )}
           </div>
         </div>
 
@@ -77,7 +106,7 @@ export default function MaturityLevelDetail({
               创建时间
             </label>
             <p className="text-slate-900 bg-slate-50 px-3 py-2 rounded-lg">
-              {new Date(maturityLevel.createdAt).toLocaleString('zh-CN')}
+              {new Date(question.createdAt).toLocaleString('zh-CN')}
             </p>
           </div>
           <div>
@@ -85,12 +114,12 @@ export default function MaturityLevelDetail({
               更新时间
             </label>
             <p className="text-slate-900 bg-slate-50 px-3 py-2 rounded-lg">
-              {new Date(maturityLevel.updatedAt).toLocaleString('zh-CN')}
+              {new Date(question.updatedAt).toLocaleString('zh-CN')}
             </p>
           </div>
         </div>
       </Modal.Body>
-
+      
       <Modal.Footer>
         <Button variant="secondary" onClick={onClose}>
           关闭

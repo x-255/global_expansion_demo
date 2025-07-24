@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useRef, useEffect } from 'react'
 import {
   createQuestion,
@@ -6,6 +8,7 @@ import {
 } from '../actions'
 import type { QuestionFormData } from '../types'
 import { Dimension } from '../../dimensions/types'
+import { Modal, Button } from '@/components/admin'
 
 interface QuestionFormProps {
   question?: QuestionWithOptions
@@ -99,22 +102,23 @@ export default function QuestionForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">
-          {question ? '编辑题目' : '添加题目'}
-        </h2>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={question ? '编辑题目' : '添加题目'}
+      size="lg"
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col flex-1">
+        <Modal.Body className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               所属维度
             </label>
             <select
               name="dimensionId"
               defaultValue={question?.dimensionId}
               required
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
             >
               <option value="">请选择维度</option>
               {dimensions.map((dimension) => (
@@ -125,8 +129,8 @@ export default function QuestionForm({
             </select>
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               题目内容
             </label>
             <textarea
@@ -134,13 +138,13 @@ export default function QuestionForm({
               defaultValue={question?.text}
               required
               rows={3}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 placeholder:text-slate-400"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 权重 *
               </label>
               <input
@@ -150,11 +154,11 @@ export default function QuestionForm({
                 value={weight}
                 onChange={(e) => setWeight(Number(e.target.value))}
                 required
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 排序 *
               </label>
               <input
@@ -163,7 +167,7 @@ export default function QuestionForm({
                 value={order}
                 onChange={(e) => setOrder(Number(e.target.value))}
                 required
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
           </div>
@@ -231,27 +235,27 @@ export default function QuestionForm({
             </div>
           </div>
 
-          {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
+          {error && (
+            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
+              {error}
+            </div>
+          )}
+        </Modal.Body>
 
-          <div className="flex justify-end gap-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              disabled={loading}
-            >
-              取消
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-              disabled={loading}
-            >
-              {loading ? '保存中...' : '保存'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <Modal.Footer>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            disabled={loading}
+          >
+            取消
+          </Button>
+          <Button type="submit" variant="primary" loading={loading}>
+            保存
+          </Button>
+        </Modal.Footer>
+      </form>
+    </Modal>
   )
 }

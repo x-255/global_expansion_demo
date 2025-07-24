@@ -3,7 +3,6 @@
 import { prisma } from '@/lib/prisma'
 import type { Company, Prisma } from '@/generated/prisma/client'
 import type { AssessmentWithScore } from './types'
-import { revalidatePath } from 'next/cache'
 
 export interface GetCompaniesParams {
   page?: number
@@ -234,10 +233,13 @@ export async function getCompanyAssessments(
   }
 }
 
-export interface UpdateCompanyState {}
+export interface UpdateCompanyState {
+  success?: boolean
+  error?: string
+}
 
 export async function updateCompany(
-  prevState: void,
+  _prevState: void,
   formdata: FormData,
   id?: number
 ) {

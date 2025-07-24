@@ -12,16 +12,19 @@ import { CoreStrategyDetail } from './components/CoreStrategyDetail'
 import type { CoreStrategyWithDetails } from './types'
 import type { MaturityLevel } from '@/generated/prisma/client'
 import { Pagination } from '@/app/components/Pagination'
+import { Card, Button, Table, Input } from '@/components/admin'
 
 const PAGE_SIZE = 10
 
 export default function CoreStrategiesPage() {
-  const [strategiesData, setStrategiesData] = useState<GetCoreStrategiesResult>({
-    strategies: [],
-    total: 0,
-    page: 1,
-    pageSize: PAGE_SIZE,
-  })
+  const [strategiesData, setStrategiesData] = useState<GetCoreStrategiesResult>(
+    {
+      strategies: [],
+      total: 0,
+      page: 1,
+      pageSize: PAGE_SIZE,
+    }
+  )
   const [levels, setLevels] = useState<MaturityLevel[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -120,123 +123,136 @@ export default function CoreStrategiesPage() {
     )
   }
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">核心策略管理</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
-        >
-          添加策略
-        </button>
-      </div>
-
-      {/* 搜索和筛选区域 */}
-      <div className="mb-6 flex gap-4">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="搜索策略名称、等级名称或行动点内容..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value)
-              setCurrentPage(1) // 重置页码
-            }}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="w-48">
-          <select
-            value={selectedLevel}
-            onChange={(e) => {
-              setSelectedLevel(
-                e.target.value === 'all' ? 'all' : Number(e.target.value)
-              )
-              setCurrentPage(1) // 重置页码
-            }}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_12px_center] bg-no-repeat pr-12"
+  const columns = [
+    {
+      key: 'id',
+      title: 'ID',
+      width: 80,
+    },
+    {
+      key: 'name',
+      title: '策略名称',
+      width: 200,
+    },
+    {
+      key: 'level',
+      title: '成熟度等级',
+      width: 150,
+      render: (_: unknown, record: CoreStrategyWithDetails) =>
+        record.level?.name || '-',
+    },
+    {
+      key: 'actions',
+      title: '行动点数量',
+      width: 120,
+      render: (_: unknown, record: CoreStrategyWithDetails) =>
+        record.actions?.length || 0,
+    },
+    {
+      key: 'operations',
+      title: '操作',
+      width: 200,
+      render: (_: unknown, record: CoreStrategyWithDetails) => (
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => handleView(record)}
           >
-            <option value="all">所有等级</option>
-            {levels.map((level) => (
-              <option key={level.id} value={level.id}>
-                {level.name}
-              </option>
-            ))}
-          </select>
+            查看详情
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+          <Button
+            size="sm"
+            variant="error"
+            onClick={() => handleDelete(record)}
+            loading={loading}
+          >
+            删除
+          </Button>
         </div>
-      </div>
+      ),
+    },
+  ]
 
-      {/* 结果统计 */}
-      <div className="mb-4 text-gray-600">
-        找到 {total} 个策略
-        {total > 0 && (
-          <span className="ml-2 text-gray-500">
-            | 显示第 {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, total)} 条
-          </span>
-        )}
-      </div>
+  return (
+    <div className="space-y-6">
+      <Card>
+        <Card.Header
+          actions={<Button onClick={() => setShowForm(true)}>添加策略</Button>}
+        >
+          <h1 className="text-2xl font-semibold text-slate-900">
+            核心策略管理
+          </h1>
+        </Card.Header>
 
-      {/* 策略列表 */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                策略名称
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                成熟度等级
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                顺序
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                行动点数量
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {strategies.map((strategy) => (
-              <tr key={strategy.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{strategy.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {strategy.level.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {strategy.order}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {strategy.actions.length}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                  <button
-                    onClick={() => handleView(strategy)}
-                    className="text-blue-600 hover:text-blue-900"
+        <Card.Body>
+          {/* 搜索和筛选区域 */}
+          <div className="mb-6 flex gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="搜索策略名称、等级名称或行动点内容..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setCurrentPage(1)
+                }}
+                leftIcon={
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    查看
-                  </button>
-                  <button
-                    onClick={() => handleEdit(strategy)}
-                    className="text-primary hover:text-primary-dark"
-                  >
-                    编辑
-                  </button>
-                  <button
-                    onClick={() => handleDelete(strategy)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    删除
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                }
+              />
+            </div>
+            <div className="w-48">
+              <select
+                value={selectedLevel}
+                onChange={(e) => {
+                  setSelectedLevel(
+                    e.target.value === 'all' ? 'all' : Number(e.target.value)
+                  )
+                  setCurrentPage(1)
+                }}
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              >
+                <option value="all">所有等级</option>
+                {levels.map((level) => (
+                  <option key={level.id} value={level.id}>
+                    {level.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+
+      <Card>
+        <Card.Body className="p-0">
+          <Table
+            columns={columns}
+            data={strategies}
+            loading={loading}
+            emptyText="暂无策略数据"
+          />
+        </Card.Body>
+      </Card>
 
       {/* 分页控件 */}
       <Pagination

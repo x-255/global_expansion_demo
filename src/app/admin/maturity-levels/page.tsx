@@ -5,6 +5,7 @@ import { getMaturityLevels, deleteMaturityLevel } from './actions'
 import MaturityLevelForm from './components/MaturityLevelForm'
 import MaturityLevelDetail from './components/MaturityLevelDetail'
 import { MaturityLevel } from './types'
+import { Card, Button, Table } from '@/components/admin'
 
 export default function MaturityLevelsPage() {
   const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([])
@@ -69,86 +70,90 @@ export default function MaturityLevelsPage() {
     setViewingMaturityLevel(null)
   }
 
+  const columns = [
+    {
+      key: 'id',
+      title: 'ID',
+      width: 80,
+    },
+    {
+      key: 'name',
+      title: '等级名称',
+      width: 150,
+    },
+    {
+      key: 'level',
+      title: '等级数值',
+      width: 120,
+    },
+    {
+      key: 'scoreRange',
+      title: '分数范围',
+      width: 150,
+      render: (_: unknown, record: MaturityLevel) =>
+        `${record.minScore} - ${record.maxScore}`,
+    },
+    {
+      key: 'actions',
+      title: '操作',
+      width: 200,
+      render: (_: unknown, record: MaturityLevel) => (
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => handleView(record)}
+          >
+            查看详情
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+          <Button
+            size="sm"
+            variant="error"
+            onClick={() => handleDelete(record.id)}
+            loading={loading}
+          >
+            删除
+          </Button>
+        </div>
+      ),
+    },
+  ]
+
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">成熟度等级管理</h1>
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-          onClick={() => setShowForm(true)}
+    <div className="space-y-6">
+      <Card>
+        <Card.Header
+          actions={
+            <Button onClick={() => setShowForm(true)}>添加成熟度等级</Button>
+          }
         >
-          添加成熟度等级
-        </button>
-      </div>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            成熟度等级管理
+          </h1>
+        </Card.Header>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">{error}</div>
-      )}
+        <Card.Body className="p-0">
+          {error && (
+            <div className="mx-6 mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                等级名称
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                等级数值
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                分数范围
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {maturityLevels.map((maturityLevel) => (
-              <tr key={maturityLevel.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {maturityLevel.id}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {maturityLevel.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {maturityLevel.level}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {maturityLevel.minScore} - {maturityLevel.maxScore}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    className="text-blue-600 hover:text-blue-900 mr-4"
-                    onClick={() => handleView(maturityLevel)}
-                    disabled={loading}
-                  >
-                    查看详情
-                  </button>
-                  <button
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    onClick={() => handleEdit(maturityLevel)}
-                    disabled={loading}
-                  >
-                    编辑
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-900"
-                    onClick={() => handleDelete(maturityLevel.id)}
-                    disabled={loading}
-                  >
-                    删除
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <Table
+            columns={columns}
+            data={maturityLevels}
+            loading={loading}
+            emptyText="暂无成熟度等级数据"
+          />
+        </Card.Body>
+      </Card>
 
       {showForm && (
         <MaturityLevelForm

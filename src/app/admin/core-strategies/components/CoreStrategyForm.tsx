@@ -8,6 +8,7 @@ import {
   createCoreStrategy,
   updateCoreStrategy,
 } from '../actions'
+import { Modal, Button } from '@/components/admin'
 
 interface Props {
   strategy?: CoreStrategyWithDetails | null
@@ -99,15 +100,14 @@ export function CoreStrategyForm({ strategy, onClose, onSubmit }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">
-          {strategy ? '编辑核心策略' : '添加核心策略'}
-        </h2>
-
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={strategy ? '编辑核心策略' : '添加核心策略'}
+      size="lg"
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col flex-1">
+        <Modal.Body className="space-y-6">
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               策略名称
@@ -197,24 +197,22 @@ export function CoreStrategyForm({ strategy, onClose, onSubmit }: Props) {
             </button>
           </div>
 
-          <div className="flex justify-end gap-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              取消
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark disabled:bg-gray-400"
-            >
-              {loading ? '保存中...' : '保存'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+          {error && (
+            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
+              {error}
+            </div>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            取消
+          </Button>
+          <Button type="submit" variant="primary" loading={loading}>
+            保存
+          </Button>
+        </Modal.Footer>
+      </form>
+    </Modal>
   )
 }
