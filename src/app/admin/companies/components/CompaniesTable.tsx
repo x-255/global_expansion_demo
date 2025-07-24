@@ -75,16 +75,10 @@ export function CompaniesTable({
       title: '公司名称',
       render: (value, record) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">
-              {(value as string).charAt(0)}
-            </span>
-          </div>
           <div>
             <div className="font-medium text-slate-900">
               {value as React.ReactNode}
             </div>
-            <div className="text-xs text-slate-500">ID: {record.id}</div>
           </div>
         </div>
       ),

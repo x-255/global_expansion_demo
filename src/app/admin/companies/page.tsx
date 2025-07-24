@@ -166,24 +166,6 @@ export default function CompaniesPage() {
         </div>
       </div>
 
-      {/* 搜索结果统计和分页信息 */}
-      <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm text-gray-600">
-        <div>
-          共 {total} 个公司
-          {total > 0 && (
-            <span className="ml-2 text-gray-500">
-              | 显示第 {(currentPage - 1) * PAGE_SIZE + 1}-
-              {Math.min(currentPage * PAGE_SIZE, total)} 条
-            </span>
-          )}
-        </div>
-        {Math.ceil(total / PAGE_SIZE) > 1 && (
-          <div className="text-gray-500">
-            第 {currentPage} 页，共 {Math.ceil(total / PAGE_SIZE)} 页
-          </div>
-        )}
-      </div>
-
       {/* 根据视图模式显示不同的内容 */}
       {viewMode === 'card' ? (
         <CompaniesCards
